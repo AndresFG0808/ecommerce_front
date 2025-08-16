@@ -3,7 +3,7 @@ import { BrowserModule } from '@angular/platform-browser';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { DashboardComponent } from './components/dashboard/dashboard/dashboard.component';
+import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { ClientesComponent } from './components/templates/clientes/clientes.component';
 import { PedidosComponent } from './components/templates/pedidos/pedidos.component';
 import { PedidosclientesComponent } from './components/templates/pedidosclientes/pedidosclientes.component';

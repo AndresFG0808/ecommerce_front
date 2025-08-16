@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { DashboardComponent } from './components/dashboard/dashboard/dashboard.component';
+import { DashboardComponent } from './components/dashboard/dashboard.component';
 import { PedidosclientesComponent } from './components/templates/pedidosclientes/pedidosclientes.component';
 import { ClientesComponent } from './components/templates/clientes/clientes.component';
 import { PedidosComponent } from './components/templates/pedidos/pedidos.component';
