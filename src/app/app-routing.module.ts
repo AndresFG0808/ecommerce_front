@@ -5,8 +5,10 @@ import { PedidosclientesComponent } from './components/templates/pedidosclientes
 import { ClientesComponent } from './components/templates/clientes/clientes.component';
 import { PedidosComponent } from './components/templates/pedidos/pedidos.component';
 import { ProductosComponent } from './components/templates/productos/productos.component';
+import { LoginComponent } from './components/login/login.component';
 
 const routes: Routes = [
+  { path: 'login', component: LoginComponent },
   { path: 'dashboard', component: DashboardComponent, children: [
     {path: '', redirectTo: 'pedidosclientes', pathMatch:'full'},
     {path: 'pedidosclientes', component: PedidosclientesComponent},
@@ -14,8 +16,8 @@ const routes: Routes = [
     {path: 'pedidos', component:PedidosComponent},
     {path: 'productos', component: ProductosComponent},
   ]},
-  { path: '', redirectTo: '/dashboard', pathMatch: 'full' },
-  { path: '**', redirectTo: 'dashboard'}
+  { path: '', redirectTo: '/login', pathMatch: 'full' },
+  { path: '**', redirectTo: 'login'}
 ];
 
 @NgModule({
