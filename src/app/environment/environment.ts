@@ -13,5 +13,6 @@
  */
 export const environment = {
     authUser: 'admin',
-    authPassword: 'admin'
+    authPassword: 'admin',
+    testToken: 'token-de-prueba-123'
 }
