@@ -12,7 +12,10 @@ export interface ClientesResponse {
     direccion?: string;
 }
 
-
+/**
+ * Interfaz que representa la solicitud de creación/actualización de un cliente.
+ * Contiene solo los campos necesarios para enviar al microservicio/api.
+ */
 
 export interface ClientesRequest {
     nombre: string;

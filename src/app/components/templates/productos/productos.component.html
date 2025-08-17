@@ -1,1 +1,212 @@
-<p>productos works!</p>
+<div class="container-fluid py-3">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="m-0">
+      <i class="bi bi-bag-fill text-primary me-2"></i>
+      Catálogo de Productos - Ropa y Tenis Hombre
+    </h3>
+    <div class="d-flex gap-2">
+      <!-- Filtro rápido por stock -->
+      <div class="btn-group" role="group" aria-label="Filtro de stock">
+        <input type="radio" class="btn-check" name="stockFilter" id="todos" autocomplete="off" checked>
+        <label class="btn btn-outline-secondary btn-sm" for="todos">Todos</label>
+
+        <input type="radio" class="btn-check" name="stockFilter" id="disponibles" autocomplete="off">
+        <label class="btn btn-outline-success btn-sm" for="disponibles">Disponibles</label>
+
+        <input type="radio" class="btn-check" name="stockFilter" id="agotados" autocomplete="off">
+        <label class="btn btn-outline-danger btn-sm" for="agotados">Agotados</label>
+      </div>
+      
+      <button class="btn btn-success" (click)="abrirModal()">
+        <i class="bi bi-plus-circle me-1"></i> Nuevo Producto
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="error" class="alert alert-danger">
+    {{ error }}
+  </div>
+
+  <div *ngIf="isLoading" class="d-flex justify-content-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+  </div>
+
+  <div *ngIf="!isLoading">
+    <div *ngIf="productos && productos.length; else emptyState">
+      <!-- Grid de productos en cards -->
+      <div class="row g-4">
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3" *ngFor="let producto of productos; let i = index">
+          <div class="card h-100 shadow-sm border-0 product-card">
+            <!-- Header del card con ID -->
+            <div class="card-header bg-light border-0 d-flex justify-content-between align-items-center">
+              <small class="text-muted fw-bold">#{{ producto.idProductos }}</small>
+              <span *ngIf="producto.stock > 0" class="badge bg-success">Disponible</span>
+              <span *ngIf="producto.stock === 0" class="badge bg-danger">Agotado</span>
+            </div>
+            
+            <!-- Imagen placeholder del producto -->
+            <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
+              <i class="bi bi-bag-fill text-muted" style="font-size: 4rem;"></i>
+            </div>
+            
+            <!-- Contenido del card -->
+            <div class="card-body d-flex flex-column">
+              <h5 class="card-title text-truncate" title="{{ producto.nombre }}">
+                {{ producto.nombre }}
+              </h5>
+              <p class="card-text text-muted small flex-grow-1" style="height: 60px; overflow: hidden;">
+                {{ producto.descripcion }}
+              </p>
+              
+              <!-- Información de precio y stock -->
+              <div class="mb-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <span class="h5 text-success mb-0 fw-bold">{{ formatearPrecio(producto.precio) }}</span>
+                </div>
+                <div class="d-flex align-items-center">
+                  <i class="bi bi-box me-2 text-muted"></i>
+                  <span [ngClass]="obtenerClaseStock(producto.stock)" class="small">
+                    {{ producto.stock }} unidades en stock
+                  </span>
+                </div>
+              </div>
+              
+              <!-- Botones de acción -->
+              <div class="d-grid gap-2">
+                <div class="btn-group" role="group">
+                  <button type="button" 
+                          class="btn btn-outline-primary btn-sm" 
+                          (click)="verDetalles(producto)"
+                          title="Ver detalles">
+                    <i class="bi bi-eye me-1"></i> Ver
+                  </button>
+                  <button type="button" 
+                          class="btn btn-outline-warning btn-sm" 
+                          (click)="editarProducto(producto)"
+                          title="Editar">
+                    <i class="bi bi-pencil me-1"></i> Editar
+                  </button>
+                  <button type="button" 
+                          class="btn btn-outline-danger btn-sm" 
+                          (click)="eliminarProducto(producto.idProductos)"
+                          title="Eliminar">
+                    <i class="bi bi-trash me-1"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Estadísticas de productos -->
+      <div class="row mt-4">
+        <div class="col-12">
+          <div class="card bg-light border-0">
+            <div class="card-body">
+              <div class="row text-center">
+                <div class="col-4">
+                  <h4 class="text-primary mb-1">{{ productos.length }}</h4>
+                  <small class="text-muted">Total de productos</small>
+                </div>
+                <div class="col-4">
+                  <h4 class="text-success mb-1">{{ obtenerProductosEnStock() }}</h4>
+                  <small class="text-muted">En stock</small>
+                </div>
+                <div class="col-4">
+                  <h4 class="text-danger mb-1">{{ obtenerProductosAgotados() }}</h4>
+                  <small class="text-muted">Agotados</small>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <ng-template #emptyState>
+      <div class="card p-4 text-center">
+        <i class="bi bi-bag display-1 text-muted mb-3"></i>
+        <p class="mb-2">No hay productos de ropa o tenis registrados.</p>
+        <button class="btn btn-primary" (click)="abrirModal()">Agregar primer producto</button>
+      </div>
+    </ng-template>
+  </div>
+
+  <!-- Modal: Nuevo / Editar Producto -->
+  <div class="modal fade" id="modalNuevoProducto" tabindex="-1" aria-labelledby="modalNuevoProductoLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <form (ngSubmit)="registrarProducto()" autocomplete="off" novalidate>
+          <div class="modal-header">
+            <h5 class="modal-title" id="modalNuevoProductoLabel">
+              <i class="bi bi-bag-plus me-2"></i>
+              {{ editandoProducto ? 'Editar Producto' : 'Nuevo Producto' }}
+            </h5>
+            <button type="button" class="btn-close" aria-label="Close" (click)="cerrarModal()"></button>
+          </div>
+          <div class="modal-body">
+            <div class="row g-3">
+              <div class="col-12">
+                <label class="form-label">Nombre del Producto</label>
+                <input name="nombre" 
+                       [(ngModel)]="nuevoProducto.nombre" 
+                       class="form-control" 
+                       required 
+                       minlength="20"
+                       maxlength="30" 
+                       placeholder="Ej: Tenis Nike Air Max 270 React para Hombre" />
+                <div class="form-text">Mínimo 20 caracteres, máximo 30 caracteres</div>
+              </div>
+              <div class="col-12">
+                <label class="form-label">Descripción</label>
+                <textarea name="descripcion" 
+                          [(ngModel)]="nuevoProducto.descripcion" 
+                          class="form-control" 
+                          rows="3" 
+                          required
+                          minlength="20"
+                          maxlength="150"
+                          placeholder="Describe el tipo de tenis, material, tecnología, estilo de ropa, talla, etc..."></textarea>
+                <div class="form-text">Mínimo 20 caracteres, máximo 150 caracteres</div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Precio ($)</label>
+                <input name="precio" 
+                       [(ngModel)]="nuevoProducto.precio" 
+                       type="number" 
+                       class="form-control" 
+                       required 
+                       min="0" 
+                       step="0.01"
+                       placeholder="0.00" />
+                <div class="form-text">Precio en pesos mexicanos</div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Stock (Unidades)</label>
+                <input name="stock" 
+                       [(ngModel)]="nuevoProducto.stock" 
+                       type="number" 
+                       class="form-control" 
+                       required 
+                       min="0" 
+                       step="1"
+                       placeholder="0" />
+                <div class="form-text">Cantidad disponible en inventario</div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" (click)="cerrarModal()">Cancelar</button>
+            <button type="submit" class="btn btn-primary">
+              <i class="bi bi-check-circle me-1"></i>
+              {{ editandoProducto ? 'Guardar cambios' : 'Registrar producto' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

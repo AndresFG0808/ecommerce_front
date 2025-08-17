@@ -2,37 +2,14 @@ import { Component } from '@angular/core';
 import { ClientesRequest, ClientesResponse } from '../../../models/clientes';
 import Swal from 'sweetalert2';
 
-
 /**
  * Componente para gestionar la información de los clientes.
- * Permite crear, editar y eliminar clientes.
+ * - Lista clientes en una tabla.
+ * - Permite crear, editar, eliminar y ver detalles.
  *
- * Los metodos se crean con void, ya que void indica que no se espera un valor de retorno.
- * Porque en este caso no necesitamos devolver nada, solo realizar acciones.
- *
- * @method ngOnInit() : void
- * @description Método que se ejecuta al inicializar el componente.
- * Aquí se pueden realizar tareas de configuración inicial.
- *
- * @var clientes: ClientesResponse[] : Viene de el modelo/interfaz ClientesResponse
- * @var nuevoCliente: ClientesRequest : Viene de el modelo/interfaz ClientesRequest
- * @var editandoCliente: boolean : Indica si se está editando un cliente
- * @var clienteEditandoId: number : ID del cliente que se está editando
- * @var isLoading: boolean : Indica si se está cargando la información
- * @var error: string : Mensaje de error en caso de fallo
- *
- * @Method cerrarModal() : void
- * @description Método para cerrar el modal de cliente.
- * @Method limpiarFormulario() : void
- * @description Método para limpiar el formulario de cliente.
- * @Method abrirModal() : void
- * @description Método para abrir el modal de cliente.
- * @Method onModalHidden() : void
- * @description Método que se ejecuta cuando se cierra el modal de cliente.
- * @Method onModalShown() : void
- * @description Método que se ejecuta cuando se muestra el modal de cliente.
+ * Los comentarios dentro del código explican por qué y cómo se usan
+ * las propiedades y métodos más relevantes para facilitar mantenimiento.
  */
-
 @Component({
   selector: 'app-clientes',
   standalone: false,
@@ -40,6 +17,8 @@ import Swal from 'sweetalert2';
   styleUrl: './clientes.component.css'
 })
 export class ClientesComponent {
+  // Array con los clientes que se muestran en la tabla.
+  // Tipo ClientesResponse porque los objetos incluyen el ID generado.
   clientes: ClientesResponse[] = [
     {
       idClientes: 1,
@@ -75,9 +54,14 @@ export class ClientesComponent {
     }
   ]
 
+  // Indicador para mostrar un spinner mientras se cargan datos
   isLoading = false;
+
+  // Mensaje de error general (si ocurre algún fallo al cargar/guardar)
   error = '';
 
+  // Modelo que representa los campos que se envían al servidor
+  // (sin ID). Usamos ClientesRequest para separar Request/Response.
   nuevoCliente: ClientesRequest = {
     nombre: '',
     apellido: '',
@@ -86,36 +70,50 @@ export class ClientesComponent {
     direccion: ''
   };
 
+  // Estado para indicar si el formulario está en modo edición
   editandoCliente = false;
+
+  // ID del cliente que se está editando (0 = no hay edición)
   clienteEditandoId = 0;
 
   /**
-   * El constructor sirve para inicializar el componente. Con el propósito de
-   * manejar la lógica de los clientes.
+   * Constructor vacío (no se inyecta servicio aquí).
+   * Si en el futuro se integra un servicio HTTP, inyectarlo en el constructor.
    */
   constructor() {}
 
   /**
-   * El método ngOnInit se ejecuta al inicializar el componente.
-   * Aquí se pueden realizar tareas de configuración inicial.
+   * Método llamado al inicializar el componente.
+   * Aquí se arrancan las cargas iniciales (p. ej. llamar al servicio).
    */
   ngOnInit() {
     this.cargarClientes();
   }
 
+  /**
+   * Simula la carga de clientes desde un servicio.
+   * - Marca isLoading mientras "carga".
+   * - En producción reemplazar la simulación por un servicio HTTP.
+   */
   cargarClientes(): void {
     this.isLoading = true;
-    // Simulacion carga desde servicio
+    // Simulación: pequeña espera para imitar petición al servidor
     setTimeout(() => {
       this.isLoading = false;
     }, 500);
   }
 
-  //Agregar
+  /**
+   * Registrar o actualizar un cliente según el estado editandoCliente.
+   * - Cuando editandoCliente === true actualiza el cliente existente.
+   * - Cuando editandoCliente === false crea uno nuevo y lo agrega al array.
+   *
+   * Nota: validaciones de formulario se omiten aquí (se puede agregar un metodo en donde 
+   * hagamos las validaciones).
+   */
   registrarCliente(): void {
 
-    //const valid = this.validarFormularioCliente(); a quien le toque validaciones en el front
-
+    // Si está en modo edición, actualizamos el cliente existente en memoria.
     if (this.editandoCliente) {
       const actualizado: ClientesResponse = {
         idClientes: this.clienteEditandoId,
@@ -128,11 +126,14 @@ export class ClientesComponent {
       const idx = this.clientes.findIndex(c => c.idClientes === this.clienteEditandoId);
       if (idx !== -1) this.clientes[idx] = actualizado;
 
+      // Cerrar modal y limpiar formulario después de actualizar
       this.cerrarModal();
       this.limpiarFormulario();
 
+      // Feedback al usuario
       Swal.fire({ title: '¡Éxito!', text: 'Cliente actualizado correctamente', icon: 'success', timer: 1500, showConfirmButton: false });
     } else {
+      // Crear nuevo cliente: generar un ID local (el backend lo generaría en producción)
       const nextId = this.clientes.length ? Math.max(...this.clientes.map(c => c.idClientes)) + 1 : 1;
       const nuevo: ClientesResponse = {
         idClientes: nextId,
@@ -144,6 +145,7 @@ export class ClientesComponent {
       };
       this.clientes.push(nuevo);
 
+      // Cerrar modal y limpiar formulario después de crear
       this.cerrarModal();
       this.limpiarFormulario();
 
@@ -151,7 +153,11 @@ export class ClientesComponent {
     }
   }
 
-  
+  /**
+   * Preparar el formulario para editar un cliente.
+   * - Rellena el modelo nuevoCliente con los datos del cliente seleccionado.
+   * - Abre el modal en modo edición.
+   */
   editarCliente(cliente: ClientesResponse): void {
     this.editandoCliente = true;
     this.clienteEditandoId = cliente.idClientes;
@@ -165,12 +171,37 @@ export class ClientesComponent {
     this.abrirModal();
   }
 
+  /**
+   * Eliminar un cliente de la lista (simulado).
+   * - En producción llamar al servicio para eliminar en el backend.
+   * - Se recomienda mostrar confirmación antes de borrar (SweetAlert).
+   */
   eliminarCliente(id: number): void {
-    
+    // Mostrar confirmación antes de eliminar
+    Swal.fire({
+      title: '¿Estás seguro?',
+      text: 'Esta acción no se puede deshacer.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    }).then(result => {
+      if (result.isConfirmed) {
+        // Filtrar el array local para eliminar el cliente
+        this.clientes = this.clientes.filter(c => c.idClientes !== id);
+        Swal.fire({ title: 'Eliminado', text: 'Cliente eliminado correctamente', icon: 'success', timer: 1500, showConfirmButton: false });
+      }
+    });
   }
 
+  /**
+   * Mostrar los detalles de un cliente en un modal informativo.
+   * - Uso de SweetAlert para evitar crear otro modal manualmente.
+   */
   verDetalles(cliente: ClientesResponse): void {
-    Swal.fire({
+    Swal.fire({ // Fire: Función para mostrar una ventana emergente de SweetAlert2 con un objeto de opciones, todas opcionales.
       title: `${cliente.nombre} ${cliente.apellido}`,
       html: `
         <div class="text-start">
@@ -185,22 +216,43 @@ export class ClientesComponent {
     });
   }
 
+  /**
+   * Restablece el modelo del formulario al estado inicial.
+   * - Usado después de crear o actualizar un cliente o al cerrar modal.
+   */
   limpiarFormulario(): void {
     this.nuevoCliente = { nombre: '', apellido: '', email: '', telefono: '', direccion: '' };
     this.editandoCliente = false;
     this.clienteEditandoId = 0;
   }
 
+  /**
+   * Abre el modal bootstrap para crear/editar cliente.
+   * - Busca el elemento por id y usa la API de bootstrap para mostrarlo.
+   * - Si en el proyecto no se usa bootstrap, reemplazar por la lógica modal correspondiente.
+   */
   abrirModal(): void {
     const modal = document.getElementById('modalNuevoCliente');
     if (modal) (window as any).bootstrap.Modal.getOrCreateInstance(modal).show();
   }
 
+  /**
+   * Cierra el modal bootstrap de cliente.
+   */
   cerrarModal(): void {
     const modal = document.getElementById('modalNuevoCliente');
     if (modal) (window as any).bootstrap.Modal.getOrCreateInstance(modal).hide();
   }
 
+  /**
+   * Ejecutado cuando el modal se oculta.
+   * - Si no estamos en edición, limpiamos el formulario para evitar datos residuales.
+   *
+   *  Lo agregue por que me pasaba que cuando cerraba el modal y lo volvía a abrir, 
+   * los campos se quedaban con los datos del cliente anterior. Pero basicamente manda a llamar
+   * el metodo limpiarFormulario() que es el que vacia los campos si en la variable editandoCliente
+   * hay un cliente en edicion al cerrar el modal.
+   */
   onModalHidden(): void {
     if (!this.editandoCliente) this.limpiarFormulario();
   }

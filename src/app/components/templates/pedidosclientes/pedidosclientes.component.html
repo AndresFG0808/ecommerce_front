@@ -1,16 +1,129 @@
-<div class="d-flex align-items-center gap-3">
-  <div class="d-flex align-items-center">
-    <i class="bi bi-person-circle fs-1 text-primary me-2"></i>
-    <div>
-      <div class="fw-bold">Luis Andres</div>
-      <select class="form-select mt-2" aria-label="Selecciona cliente">
-        <option value="1">Luis Andres</option>
-        <option value="2">Maria Gomez</option>
-        <option value="3">Carlos ruiz</option>
-        <option value="4">Ana Torres</option>
-      </select>
+<div class="container-fluid py-3">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="m-0">
+      <i class="bi bi-person-lines-fill text-primary me-2"></i>
+      Pedidos por Cliente
+    </h3>
+  </div>
+
+  <!-- Selector de Cliente -->
+  <div class="card mb-4">
+    <div class="card-body">
+      <div class="row align-items-center">
+        <div class="col-md-8">
+          <label class="form-label fw-semibold">Seleccionar Cliente:</label>
+          <select class="form-select" 
+                  [(ngModel)]="selectedClientId" 
+                  name="clienteSelect">
+            <option [ngValue]="null">Todos los clientes</option>
+            <option *ngFor="let cliente of clientes" [ngValue]="cliente.idClientes">
+              {{ cliente.nombre }} {{ cliente.apellido }} - {{ cliente.email }}
+            </option>
+          </select>
+        </div>
+        <div class="col-md-4 text-end">
+          <div class="text-muted small">
+            <div>Pedidos encontrados: <strong>{{ filteredPedidos.length }}</strong></div>
+            <div *ngIf="selectedClientId">
+              Total: <strong class="text-success">{{ formatearPrecio(calcularTotalPedidos()) }}</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Estadísticas rápidas (solo si hay cliente seleccionado) -->
+  <div *ngIf="selectedClientId" class="row mb-4">
+    <div class="col-md-3">
+      <div class="card border-warning">
+        <div class="card-body text-center">
+          <i class="bi bi-clock-fill text-warning fs-1"></i>
+          <h5 class="mt-2">{{ contarPedidosPorEstado('PENDIENTE') }}</h5>
+          <small class="text-muted">Pendientes</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card border-info">
+        <div class="card-body text-center">
+          <i class="bi bi-truck text-info fs-1"></i>
+          <h5 class="mt-2">{{ contarPedidosPorEstado('ENVIADO') }}</h5>
+          <small class="text-muted">Enviados</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card border-success">
+        <div class="card-body text-center">
+          <i class="bi bi-check-circle-fill text-success fs-1"></i>
+          <h5 class="mt-2">{{ contarPedidosPorEstado('ENTREGADO') }}</h5>
+          <small class="text-muted">Entregados</small>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card border-danger">
+        <div class="card-body text-center">
+          <i class="bi bi-x-circle-fill text-danger fs-1"></i>
+          <h5 class="mt-2">{{ contarPedidosPorEstado('CANCELADO') }}</h5>
+          <small class="text-muted">Cancelados</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabla de Pedidos -->
+  <div class="card shadow-sm">
+    <div class="card-body p-0">
+      <div *ngIf="filteredPedidos.length > 0; else emptyState" class="table-responsive">
+        <table class="table table-hover mb-0 align-middle">
+          <thead class="table-light">
+            <tr>
+              <th># Pedido</th>
+              <th>Cliente</th>
+              <th>Total</th>
+              <th>Fecha</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let pedido of filteredPedidos">
+              <td class="fw-bold text-primary">#{{ pedido.idPedidos }}</td>
+              <td>
+                <div class="d-flex align-items-center">
+                  <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-2"
+                       style="width:35px; height:35px; font-weight:600; font-size:0.8rem;">
+                    {{ obtenerNombreCliente(pedido.idCliente).split(' ')[0].charAt(0) }}{{ obtenerNombreCliente(pedido.idCliente).split(' ')[1]?.charAt(0) || '' }}
+                  </div>
+                  <div>{{ obtenerNombreCliente(pedido.idCliente) }}</div>
+                </div>
+              </td>
+              <td>
+                <span class="fw-bold text-success">{{ formatearPrecio(pedido.total) }}</span>
+              </td>
+              <td>
+                <small>{{ formatearFecha(pedido.fechaCreacion) }}</small>
+              </td>
+              <td>
+                <span [ngClass]="obtenerClaseEstado(pedido.estado)">{{ pedido.estado }}</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <ng-template #emptyState>
+        <div class="text-center py-5">
+          <i class="bi bi-inbox display-1 text-muted"></i>
+          <h5 class="mt-3 text-muted">
+            {{ selectedClientId ? 'Este cliente no tiene pedidos registrados' : 'Selecciona un cliente para ver sus pedidos' }}
+          </h5>
+          <p class="text-muted">
+            {{ selectedClientId ? 'Aún no se han creado pedidos para este cliente.' : 'Usa el selector de arriba para filtrar los pedidos por cliente.' }}
+          </p>
+        </div>
+      </ng-template>
     </div>
   </div>
 </div>
-
-<p class="mt-4">Lista para ver pedido</p>

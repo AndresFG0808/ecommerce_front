@@ -12,26 +12,42 @@ import Swal from 'sweetalert2';
 export class DashboardComponent {
   constructor(private authService: AuthService, private router: Router) {}
 
+  /**
+   * MÉTODO CORREGIDO: logout()
+   * 
+   * PROBLEMA IDENTIFICADO (17/08/2025):
+   * - No se llamaba authService.logout() para limpiar el token
+   * - Solo navegaba al login sin limpiar el estado de autenticación
+   * - Los usuarios podían volver a acceder usando el botón "atrás"
+   * 
+   * SOLUCIÓN:
+   * - Llamar primero authService.logout() para limpiar tokens
+   * - Mostrar confirmación después de la limpieza
+   * - El authService.logout() ya incluye la navegación
+   */
   logout(): void {
     Swal.fire({
-      title: "Cerrar sesion",
-      text: "¿Estas seguro de cerrar sesion?",
+      title: "Cerrar sesión",
+      text: "¿Estás seguro de cerrar sesión?",
       icon: 'question',
       showCancelButton: true,
       confirmButtonColor: '#3085d6',
       cancelButtonColor: '#d33',
-      confirmButtonText: 'Si, cerrar sesion',
+      confirmButtonText: 'Sí, cerrar sesión',
       cancelButtonText: 'Cancelar'
     }).then((result) => {
       if(result.isConfirmed) {
-        this.router.navigate(['/login'])
+        // CORRECCIÓN: Llamar al authService para limpiar tokens y estado
+        this.authService.logout();
+        
+        // Mostrar confirmación de logout exitoso
         Swal.fire({
-          title: 'Sesion cerrada!',
-          text: 'Haz cerrado sesion correctamente',
+          title: '¡Sesión cerrada!',
+          text: 'Has cerrado sesión correctamente',
           icon: 'success',
           timer: 2000,
           showConfirmButton: false
-        })
+        });
       }
     });
   }
