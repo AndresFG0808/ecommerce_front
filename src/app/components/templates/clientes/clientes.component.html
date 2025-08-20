@@ -32,7 +32,7 @@
           </thead>
           <tbody>
             <tr *ngFor="let cliente of clientes">
-              <td class="fw-bold text-primary">{{ cliente.idClientes }}</td>
+              <td class="fw-bold text-primary">{{ cliente.id }}</td>
               <td>
                 <div class="d-flex align-items-center">
                   <div
@@ -68,7 +68,7 @@
                   </button>
                   <button
                     class="btn btn-outline-danger btn-sm"
-                    (click)="eliminarCliente(cliente.idClientes)"
+                    (click)="eliminarCliente(cliente.id)"
                     title="Eliminar"
                   >
                     <i class="bi bi-trash"></i>
@@ -125,7 +125,7 @@
                 <label class="form-label">Nombre</label>
                 <input
                   name="nombre"
-                  [(ngModel)]="nuevoCliente.nombre"
+                  [(ngModel)]="nuevoCliente"
                   class="form-control"
                   required
                   maxlength="50"
@@ -135,7 +135,7 @@
                 <label class="form-label">Apellido</label>
                 <input
                   name="apellido"
-                  [(ngModel)]="nuevoCliente.apellido"
+                  [(ngModel)]="nuevoApellido"
                   class="form-control"
                   required
                   maxlength="50"
@@ -145,7 +145,7 @@
                 <label class="form-label">Email</label>
                 <input
                   name="email"
-                  [(ngModel)]="nuevoCliente.email"
+                  [(ngModel)]="nuevoEmail"
                   type="email"
                   class="form-control"
                   required
@@ -156,7 +156,7 @@
                 <label class="form-label">Teléfono</label>
                 <input
                   name="telefono"
-                  [(ngModel)]="nuevoCliente.telefono"
+                  [(ngModel)]="nuevoTelefono"
                   class="form-control"
                   required
                   maxlength="10"
@@ -167,7 +167,7 @@
                 <label class="form-label">Dirección</label>
                 <textarea
                   name="direccion"
-                  [(ngModel)]="nuevoCliente.direccion"
+                  [(ngModel)]="nuevoDireccion"
                   class="form-control"
                   rows="2"
                   maxlength="100"

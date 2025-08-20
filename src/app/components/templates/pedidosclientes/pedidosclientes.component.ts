@@ -21,10 +21,10 @@ export class PedidosclientesComponent implements OnInit {
   
   // Lista completa de clientes disponibles para seleccionar
   clientes: ClientesResponse[] = [
-    { idClientes: 1, nombre: 'Luis', apellido: 'Andres', email: 'luis.andres@email.com', telefono: '1234567890' },
-    { idClientes: 2, nombre: 'Maria', apellido: 'Gomez', email: 'maria.gomez@email.com', telefono: '0987654321' },
-    { idClientes: 3, nombre: 'Carlos', apellido: 'Ruiz', email: 'carlos.ruiz@email.com', telefono: '5555555555' },
-    { idClientes: 4, nombre: 'Ana', apellido: 'Torres', email: 'ana.torres@email.com', telefono: '1111111111' }
+    { id: 1, nombre: 'Luis', apellido: 'Andres', email: 'luis.andres@email.com', telefono: '1234567890' },
+    { id: 2, nombre: 'Maria', apellido: 'Gomez', email: 'maria.gomez@email.com', telefono: '0987654321' },
+    { id: 3, nombre: 'Carlos', apellido: 'Ruiz', email: 'carlos.ruiz@email.com', telefono: '5555555555' },
+    { id: 4, nombre: 'Ana', apellido: 'Torres', email: 'ana.torres@email.com', telefono: '1111111111' }
   ];
 
   // Cliente actualmente seleccionado (null = mostrar todos)
@@ -91,7 +91,7 @@ export class PedidosclientesComponent implements OnInit {
    * @returns Nombre completo del cliente o ID si no se encuentra
    */
   obtenerNombreCliente(idCliente: number): string {
-    const cliente = this.clientes.find(c => c.idClientes === idCliente);
+    const cliente = this.clientes.find(c => c.id === idCliente);
     return cliente ? `${cliente.nombre} ${cliente.apellido}` : `Cliente #${idCliente}`;
   }
 

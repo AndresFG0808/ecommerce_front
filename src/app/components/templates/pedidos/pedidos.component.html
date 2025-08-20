@@ -121,7 +121,7 @@
                         class="form-select" 
                         required>
                   <option value="0">Seleccionar cliente...</option>
-                  <option *ngFor="let cliente of clientes" [value]="cliente.idClientes">
+                  <option *ngFor="let cliente of clientes" [value]="cliente.id">
                     {{ cliente.nombre }} {{ cliente.apellido }}
                   </option>
                 </select>

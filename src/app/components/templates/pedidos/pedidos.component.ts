@@ -55,10 +55,10 @@ export class PedidosComponent implements OnInit {
   // Lista de clientes para mostrar nombres en lugar de IDs
   // En producción esto vendría de un servicio de clientes
   clientes: ClientesResponse[] = [
-    { idClientes: 1, nombre: 'Luis', apellido: 'Andres', email: 'luis.andres@email.com', telefono: '1234567890' },
-    { idClientes: 2, nombre: 'Maria', apellido: 'Gomez', email: 'maria.gomez@email.com', telefono: '0987654321' },
-    { idClientes: 3, nombre: 'Carlos', apellido: 'Ruiz', email: 'carlos.ruiz@email.com', telefono: '5555555555' },
-    { idClientes: 4, nombre: 'Ana', apellido: 'Torres', email: 'ana.torres@email.com', telefono: '1111111111' }
+    { id: 1, nombre: 'Luis', apellido: 'Andres', email: 'luis.andres@email.com', telefono: '1234567890' },
+    { id: 2, nombre: 'Maria', apellido: 'Gomez', email: 'maria.gomez@email.com', telefono: '0987654321' },
+    { id: 3, nombre: 'Carlos', apellido: 'Ruiz', email: 'carlos.ruiz@email.com', telefono: '5555555555' },
+    { id: 4, nombre: 'Ana', apellido: 'Torres', email: 'ana.torres@email.com', telefono: '1111111111' }
   ];
 
   // Estados posibles para un pedido (según constraint de BD)
@@ -124,7 +124,7 @@ export class PedidosComponent implements OnInit {
 
     if (!p.idCliente || p.idCliente <= 0) return { valido: false, error: 'Debe seleccionar un cliente' };
     
-    const clienteExiste = this.clientes.some(c => c.idClientes === p.idCliente);
+    const clienteExiste = this.clientes.some(c => c.id === p.idCliente);
     if (!clienteExiste) return { valido: false, error: 'El cliente seleccionado no existe' };
 
     if (p.total === null || p.total === undefined) return { valido: false, error: 'El total es obligatorio' };
@@ -279,7 +279,7 @@ export class PedidosComponent implements OnInit {
    * Obtiene el nombre completo del cliente por su ID.
    */
   obtenerNombreCliente(idCliente: number): string {
-    const cliente = this.clientes.find(c => c.idClientes === idCliente);
+    const cliente = this.clientes.find(c => c.id === idCliente);
     return cliente ? `${cliente.nombre} ${cliente.apellido}` : `Cliente #${idCliente}`;
   }
 
