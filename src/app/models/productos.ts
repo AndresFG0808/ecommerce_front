@@ -9,7 +9,7 @@
  * @property stock - Cantidad disponible en inventario (debe ser mayor o igual a 0)
  */
 export interface ProductosResponse {
-    idProductos: number;
+    id: number;
     nombre: string;
     descripcion: string;
     precio: number;

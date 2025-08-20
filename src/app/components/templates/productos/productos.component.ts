@@ -1,15 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { ProductosRequest, ProductosResponse } from '../../../models/productos';
 import Swal from 'sweetalert2';
+import { ProductoService } from '../../../services/producto.service';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
 /**
- * Componente para gestionar la información de los productos.
- * - Lista productos en una tabla con información de stock y precios.
- * - Permite crear, editar, eliminar y ver detalles de productos.
- * - Controla validaciones específicas según los constraints de la BD.
- *
- * Los comentarios dentro del código explican por qué y cómo se usan
- * las propiedades y métodos más relevantes para facilitar mantenimiento.
+ * Componente para manejar la visualización y gestión de productos.
+ * Permite crear, editar, eliminar y listar productos.
  */
 @Component({
   selector: 'app-productos',
@@ -18,321 +15,261 @@ import Swal from 'sweetalert2';
   styleUrl: './productos.component.css'
 })
 export class ProductosComponent implements OnInit {
-  // Array con los productos que se muestran en la tabla.
-  // Tipo ProductosResponse porque los objetos incluyen el ID generado.
-  productos: ProductosResponse[] = [
-    {
-      idProductos: 1,
-      nombre: 'Tenis Nike Air Max 270 React para Hombre Negro',
-      descripcion: 'Tenis deportivos con tecnología Air Max, suela de espuma React, diseño moderno y cómodo para uso diario',
-      precio: 2599.00,
-      stock: 45
-    },
-    {
-      idProductos: 2,
-      nombre: 'Camisa de Vestir Slim Fit Azul Marino Hugo Boss',
-      descripcion: 'Camisa de algodón premium con corte slim fit, cuello italiano, perfecta para ocasiones formales',
-      precio: 1899.50,
-      stock: 30
-    },
-    {
-      idProductos: 3,
-      nombre: 'Tenis Adidas Ultraboost 22 Running Blanco/Negro',
-      descripcion: 'Tenis para correr con tecnología Boost, upper Primeknit, máximo retorno de energía en cada pisada',
-      precio: 3299.00,
-      stock: 22
-    },
-    {
-      idProductos: 4,
-      nombre: 'Pantalón de Mezclilla Levis 501 Original Azul',
-      descripcion: 'Jeans clásicos de corte recto, 100% algodón, diseño atemporal y duradero, talla americana',
-      precio: 1199.99,
-      stock: 35
-    },
-    {
-      idProductos: 5,
-      nombre: 'Tenis Puma RS-X3 Puzzle Lifestyle Multicolor',
-      descripcion: 'Tenis casual con diseño retro-futurista, suela gruesa, colores vibrantes, ideal para streetwear',
-      precio: 2199.00,
-      stock: 18
-    },
-    {
-      idProductos: 6,
-      nombre: 'Playera Polo Ralph Lauren Classic Fit Blanca',
-      descripcion: 'Polo de algodón piqué con bordado del logo, corte clásico, cuello y puños en contraste',
-      precio: 899.00,
-      stock: 60
-    },
-    {
-      idProductos: 7,
-      nombre: 'Tenis Converse Chuck Taylor All Star High Top',
-      descripcion: 'Tenis clásicos de caña alta, lona resistente, suela de goma vulcanizada, estilo icónico',
-      precio: 1299.00,
-      stock: 40
-    },
-    {
-      idProductos: 8,
-      nombre: 'Sudadera Champion Powerblend Fleece Hoodie Gris',
-      descripcion: 'Sudadera con capucha, mezcla de algodón y poliéster, bolsillo frontal tipo canguro, logo bordado',
-      precio: 799.50,
-      stock: 0
-    }
-  ];
-
-  // Indicador para mostrar un spinner mientras se cargan datos
+  productos: ProductosResponse[] = [];
+  productoForm: FormGroup;
+  textoModal: string = 'Nuevo Producto';
+  showForm = false;
+  selectedProducto: ProductosResponse | null = null;
+  isEditMode: boolean = false;
+  muestraAcciones: boolean = false;
   isLoading = false;
-
-  // Mensaje de error general (si ocurre algún fallo al cargar/guardar)
   error = '';
 
-  // Modelo que representa los campos que se envían al servidor
-  // (sin ID). Usamos ProductosRequest para separar Request/Response.
-  nuevoProducto: ProductosRequest = {
-    nombre: '',
-    descripcion: '',
-    precio: 0,
-    stock: 0
-  };
-
-  // Estado para indicar si el formulario está en modo edición
-  editandoProducto = false;
-
-  // ID del producto que se está editando (0 = no hay edición)
-  productoEditandoId = 0;
-
   /**
-   * Constructor vacío (no se inyecta servicio aquí).
-   * Si en el futuro se integra un servicio HTTP, inyectarlo en el constructor.
+   * Constructor del componente ProductosComponent.
+   * Inicializa el formulario de productos y los servicios necesarios.
+   * @param productoService Servicio para manejar productos.
+   * @param formBuilder FormBuilder para crear formularios reactivos.
    */
-  constructor() {}
-
+  constructor(
+    private productoService: ProductoService,
+    private formBuilder: FormBuilder
+  ) {
+    this.productoForm = this.formBuilder.group({
+      nombre: ['', [Validators.required, Validators.minLength(20), Validators.maxLength(30)]],
+      descripcion: ['', [Validators.required, Validators.minLength(20), Validators.maxLength(150)]],
+      precio: [0, [Validators.required, Validators.min(0)]],
+      stock: [0, [Validators.required, Validators.min(0), Validators.pattern('^[0-9]+$')]]
+    });
+  }
   /**
-   * Método llamado al inicializar el componente.
-   * Aquí se arrancan las cargas iniciales (p. ej. llamar al servicio).
+   * Inicializa el componente y carga los productos.
+   * Se llama al método cargarProductos para obtener la lista de productos desde el servicio.
    */
+
   ngOnInit(): void {
     this.cargarProductos();
   }
 
   /**
-   * Simula la carga de productos desde un servicio.
-   * - Marca isLoading mientras "carga".
-   * - En producción reemplazar la simulación por un servicio HTTP.
-   */
+   * Carga la lista de productos desde el servicio.
+   * Muestra un mensaje de error si no se pueden cargar los productos.
+   */ 
   cargarProductos(): void {
     this.isLoading = true;
-    // Simulación: pequeña espera para imitar petición al servidor
-    setTimeout(() => {
-      this.isLoading = false;
-    }, 500);
-  }
-
-  /**
-   * Validaciones específicas para productos según constraints de BD.
-   * - Nombre: mínimo 20 caracteres (CHECK LENGTH(NOMBRE) >= 20)
-   * - Descripción: mínimo 20 caracteres (CHECK LENGTH(DESCRIPCION) >= 20)
-   * - Precio: mayor o igual a 0 (CHECK PRECIO >= 0)
-   * - Stock: mayor o igual a 0 (CHECK STOCK >= 0)
-   */
-  validarFormularioProducto(): { valido: boolean; error?: string } {
-    const p = this.nuevoProducto;
-
-    if (!p.nombre || !p.nombre.trim()) return { valido: false, error: 'El nombre no puede estar vacío' };
-    if (p.nombre.trim().length < 20) return { valido: false, error: 'El nombre debe tener al menos 20 caracteres' };
-    if (p.nombre.trim().length > 30) return { valido: false, error: 'El nombre no debe superar 30 caracteres' };
-
-    if (!p.descripcion || !p.descripcion.trim()) return { valido: false, error: 'La descripción no puede estar vacía' };
-    if (p.descripcion.trim().length < 20) return { valido: false, error: 'La descripción debe tener al menos 20 caracteres' };
-    if (p.descripcion.trim().length > 150) return { valido: false, error: 'La descripción no debe superar 150 caracteres' };
-
-    if (p.precio === null || p.precio === undefined) return { valido: false, error: 'El precio es obligatorio' };
-    if (p.precio < 0) return { valido: false, error: 'El precio debe ser mayor o igual a 0' };
-
-    if (p.stock === null || p.stock === undefined) return { valido: false, error: 'El stock es obligatorio' };
-    if (p.stock < 0) return { valido: false, error: 'El stock debe ser mayor o igual a 0' };
-    if (!Number.isInteger(p.stock)) return { valido: false, error: 'El stock debe ser un número entero' };
-
-    return { valido: true };
-  }
-
-  /**
-   * Registrar o actualizar un producto según el estado editandoProducto.
-   * - Cuando editandoProducto === true actualiza el producto existente.
-   * - Cuando editandoProducto === false crea uno nuevo y lo agrega al array.
-   */
-  registrarProducto(): void {
-    const valid = this.validarFormularioProducto();
-    if (!valid.valido) {
-      Swal.fire({ title: 'Error de validación', text: valid.error, icon: 'warning', confirmButtonColor: '#3085d6', confirmButtonText: 'Entendido' });
-      return;
-    }
-
-    if (this.editandoProducto) {
-      const actualizado: ProductosResponse = {
-        idProductos: this.productoEditandoId,
-        nombre: this.nuevoProducto.nombre.trim(),
-        descripcion: this.nuevoProducto.descripcion.trim(),
-        precio: this.nuevoProducto.precio,
-        stock: this.nuevoProducto.stock
-      };
-      const idx = this.productos.findIndex(p => p.idProductos === this.productoEditandoId);
-      if (idx !== -1) this.productos[idx] = actualizado;
-
-      this.cerrarModal();
-      this.limpiarFormulario();
-
-      Swal.fire({ title: '¡Éxito!', text: 'Producto actualizado correctamente', icon: 'success', timer: 1500, showConfirmButton: false });
-    } else {
-      const nextId = this.productos.length ? Math.max(...this.productos.map(p => p.idProductos)) + 1 : 1;
-      const nuevo: ProductosResponse = {
-        idProductos: nextId,
-        nombre: this.nuevoProducto.nombre.trim(),
-        descripcion: this.nuevoProducto.descripcion.trim(),
-        precio: this.nuevoProducto.precio,
-        stock: this.nuevoProducto.stock
-      };
-      this.productos.push(nuevo);
-
-      this.cerrarModal();
-      this.limpiarFormulario();
-
-      Swal.fire({ title: '¡Éxito!', text: 'Producto registrado correctamente', icon: 'success', timer: 1500, showConfirmButton: false });
-    }
-  }
-
-  /**
-   * Preparar el formulario para editar un producto.
-   * - Rellena el modelo nuevoProducto con los datos del producto seleccionado.
-   * - Abre el modal en modo edición.
-   */
-  editarProducto(producto: ProductosResponse): void {
-    this.editandoProducto = true;
-    this.productoEditandoId = producto.idProductos;
-    this.nuevoProducto = {
-      nombre: producto.nombre,
-      descripcion: producto.descripcion,
-      precio: producto.precio,
-      stock: producto.stock
-    };
-    this.abrirModal();
-  }
-
-  /**
-   * Eliminar un producto de la lista (simulado).
-   * - En producción llamar al servicio para eliminar en el backend.
-   * - Se recomienda mostrar confirmación antes de borrar (SweetAlert).
-   */
-  eliminarProducto(id: number): void {
-    Swal.fire({
-      title: '¿Estás seguro?',
-      text: 'Esta acción eliminará el producto permanentemente.',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#d33',
-      cancelButtonColor: '#3085d6',
-      confirmButtonText: 'Sí, eliminar',
-      cancelButtonText: 'Cancelar'
-    }).then(result => {
-      if (result.isConfirmed) {
-        this.productos = this.productos.filter(p => p.idProductos !== id);
-        Swal.fire({ title: 'Eliminado', text: 'Producto eliminado correctamente', icon: 'success', timer: 1500, showConfirmButton: false });
+    this.productoService.getProductos().subscribe({
+      next: resp => {
+        this.productos = resp;
+        console.log(this.productos);
+        this.isLoading = false;
+      },
+      error: err => {
+        this.error = 'Error al cargar productos';
+        this.isLoading = false;
       }
     });
   }
 
   /**
-   * Mostrar los detalles de un producto en un modal informativo.
-   * - Uso de SweetAlert para evitar crear otro modal manualmente.
+   * Muestra u oculta el formulario para crear o editar un producto.
+   * Si el formulario está visible, se oculta; si está oculto, se muestra.
+   * Resetea el formulario y establece el modo de edición a falso.
    */
-  verDetalles(producto: ProductosResponse): void {
-    Swal.fire({
-      title: producto.nombre,
-      html: `
-        <div class="text-start">
-          <p><strong>Descripción:</strong> ${producto.descripcion}</p>
-          <p><strong>Precio:</strong> $${producto.precio.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</p>
-          <p><strong>Stock disponible:</strong> ${producto.stock} unidades</p>
-          <p><strong>Estado:</strong> ${producto.stock > 0 ? '<span class="text-success">Disponible</span>' : '<span class="text-danger">Agotado</span>'}</p>
-        </div>
-      `,
-      icon: 'info',
-      confirmButtonColor: '#3085d6',
-      confirmButtonText: 'Cerrar'
+  toggleForm(): void {
+    this.showForm = !this.showForm;
+    this.textoModal = 'Nuevo Producto';
+    this.isEditMode = false;
+    this.productoForm.reset();
+    this.selectedProducto = null;
+    this.abrirModal();
+  }
+
+  /**
+   * Resetea el formulario y oculta el modal.
+   * Limpia los campos del formulario y restablece el estado del modal.
+   */
+  resetForm(): void {
+    this.productoForm.reset();
+    this.showForm = false;
+    this.textoModal = 'Nuevo Producto';
+    this.isEditMode = false;
+    this.selectedProducto = null;
+  }
+  /**
+   * Envía el formulario para crear o editar un producto.
+   * Si el formulario es válido, se envía la solicitud al servicio correspondiente.
+   * En caso de éxito, se actualiza la lista de productos y se muestra un mensaje de éxito.
+   * En caso de error, se muestra un mensaje de error.
+   */
+
+  onsubmit(): void {
+    if (this.productoForm.valid) {
+      const productoData: ProductosRequest = this.productoForm.value;
+
+      if (this.isEditMode && this.selectedProducto) {
+        /**Editar producto existente
+         * Aquí se agrega la lógica para editar un producto existente.
+         * Se utiliza el servicio productoService para enviar la solicitud de actualización al backend.
+         *  */ 
+        this.productoService.putProducto(productoData, this.selectedProducto.id).subscribe({
+          next: updateProducto => {
+            const index = this.productos.findIndex(p => p.id === updateProducto.id);
+            if (index !== -1) {
+              this.productos[index] = updateProducto;
+            }
+            Swal.fire({
+              title: 'Éxito',
+              text: 'Producto actualizado correctamente',
+              icon: 'success',
+            });
+            this.resetForm();
+              const modal = document.getElementById('modalProducto');
+            if (modal) (window as any).bootstrap.Modal.getOrCreateInstance(modal).hide();
+
+            this.cerrarModal();
+          },
+          error: () => {
+            Swal.fire({
+              title: 'Error',
+              text: 'No se pudo actualizar el producto',
+              icon: 'error',
+            });
+          }
+        });
+      } else {
+        // Crear nuevo producto
+        /**
+         * Aquí se agrega la lógica para crear un nuevo producto.
+         */
+
+        this.productoService.postProducto(productoData).subscribe({
+          next: newProducto => {
+            this.productos.push(newProducto);
+            Swal.fire({
+              title: 'Éxito',
+              text: 'Producto creado correctamente',
+              icon: 'success',
+              confirmButtonText: 'Aceptar'
+            });
+            this.resetForm();
+            const modal = document.getElementById('modalProducto');
+            if (modal) (window as any).bootstrap.Modal.getOrCreateInstance(modal).hide();
+
+            this.cerrarModal();
+          },
+          error: () => {
+            Swal.fire({
+              title: 'Error',
+              text: 'No se pudo crear el producto',
+              icon: 'error',
+            });
+          }
+        });
+      }
+    }
+  }
+
+  /**
+   * Edita un producto existente.
+   * Muestra el formulario con los datos del producto seleccionado.
+   * @param producto 
+   */
+
+  editProducto(producto: ProductosResponse): void {
+    this.showForm = true;
+    this.textoModal = 'Editando Producto ' + producto.nombre;
+    this.isEditMode = true;
+    this.selectedProducto = producto;
+    this.productoForm.patchValue({
+      nombre: producto.nombre,
+      descripcion: producto.descripcion,
+      precio: producto.precio,
+      stock: producto.stock
+      
     });
+    this.abrirModal();
+  }
+ /**
+  *   Elimina un producto por su ID.
+  * Muestra un modal de confirmación antes de eliminar.
+  * @param id 
+  * @returns 
+  */
+  deleteProducto(id: number): void {
+  if (!id) {
+    Swal.fire({
+      title: 'Error',
+      text: 'ID de producto inválido. No se puede eliminar.',
+      icon: 'error',
+    });
+    return;
   }
 
-  /**
-   * Restablece el modelo del formulario al estado inicial.
-   * - Usado después de crear o actualizar un producto o al cerrar modal.
-   */
-  limpiarFormulario(): void {
-    this.nuevoProducto = { nombre: '', descripcion: '', precio: 0, stock: 0 };
-    this.editandoProducto = false;
-    this.productoEditandoId = 0;
-  }
+  Swal.fire({
+    title: '¿Estás seguro?',
+    text: 'No podrás deshacer esta acción',
+    icon: 'warning',
+    showConfirmButton: true,
+    showCancelButton: true,
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33',
+    confirmButtonText: 'Sí, eliminar'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      this.productoService.deleteProducto(id).subscribe({
+        next: deletedProducto => {
+          this.productos = this.productos.filter(p => p.id !== id);
+          Swal.fire({
+            title: 'Éxito',
+            text: 'Producto ' + deletedProducto.nombre + ' eliminado correctamente',
+            icon: 'success',
+          });
+        },
+        error: () => {
+          Swal.fire({
+            title: 'Error',
+            text: 'No se pudo eliminar el producto',
+            icon: 'error',
+          });
+        }
+      });
+    }
+  });
+}
 
   /**
-   * Abre el modal bootstrap para crear/editar producto.
-   * - Busca el elemento por id y usa la API de bootstrap para mostrarlo.
+   * Abre el modal bootstrap de cliente.
+   * @param {void}
+   * @returns {void}
    */
-  abrirModal(): void {
-    const modal = document.getElementById('modalNuevoProducto');
+abrirModal(): void {
+    const modal = document.getElementById('modalProducto');
     if (modal) (window as any).bootstrap.Modal.getOrCreateInstance(modal).show();
   }
 
   /**
-   * Cierra el modal bootstrap de producto.
+   * Cierra el modal bootstrap de cliente.
+   * @param {void}
+   * @returns {void}
    */
   cerrarModal(): void {
-    const modal = document.getElementById('modalNuevoProducto');
+    const modal = document.getElementById('modalNuevoCliente');
     if (modal) (window as any).bootstrap.Modal.getOrCreateInstance(modal).hide();
   }
+/**
+ * 
+ * Permite que solo se ingresen números en los campos de tipo número.
+ * @param event Evento de teclado.
+ */
 
-  /**
-   * Ejecutado cuando el modal se oculta.
-   * - Si no estamos en edición, limpiamos el formulario para evitar datos residuales.
-   */
-  onModalHidden(): void {
-    if (!this.editandoProducto) this.limpiarFormulario();
-  }
-
-  /**
-   * Formatea el precio para mostrar en la tabla con formato de moneda mexicana.
-   * @param precio Precio numérico del producto
-   * @returns String formateado como moneda
-   */
-  formatearPrecio(precio: number): string {
-    return precio.toLocaleString('es-MX', { 
-      style: 'currency', 
-      currency: 'MXN',
-      minimumFractionDigits: 2 
-    });
-  }
-
-  /**
-   * Determina el color del badge de stock según la cantidad disponible.
-   * @param stock Cantidad en inventario
-   * @returns Clase CSS para el badge
-   */
-  obtenerClaseStock(stock: number): string {
-    if (stock === 0) return 'badge bg-danger';
-    if (stock <= 10) return 'badge bg-warning text-dark';
-    return 'badge bg-success';
-  }
-
-  /**
-   * Cuenta los productos que tienen stock disponible (mayor a 0).
-   * @returns Número de productos en stock
-   */
-  obtenerProductosEnStock(): number {
-    return this.productos.filter(p => p.stock > 0).length;
-  }
-
-  /**
-   * Cuenta los productos que están agotados (stock = 0).
-   * @returns Número de productos agotados
-   */
-  obtenerProductosAgotados(): number {
-    return this.productos.filter(p => p.stock === 0).length;
+  onlyNumbers(event: KeyboardEvent): void {
+  const charCode = event.key.charCodeAt(0);
+  // Solo permitir números (0-9) y punto para decimales
+  if (event.key !== '.' && (charCode < 48 || charCode > 57)) {
+    event.preventDefault();
   }
 }
+
+}
+
+

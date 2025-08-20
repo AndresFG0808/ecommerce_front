@@ -14,5 +14,6 @@
 export const environment = {
     authUser: 'admin',
     authPassword: 'admin',
-    testToken: 'token-de-prueba-123'
+    testToken: 'token-de-prueba-123',
+    apiUrl: 'http://localhost:8090/api' // URL base de la API
 }
