@@ -36,7 +36,8 @@ export class AgregarPedidoComponent {
     getClientes() : void {
       this.clientesService.getClientes().subscribe({
         next: (data) => {
-          this.clientes = data
+          // Faltaba parsear, por que estamos en un array de datos
+          this.clientes = Array.isArray(data) ? data : [data];
         }, error : (error) => {
           console.log('error: ', error)
         }

@@ -15,5 +15,6 @@ export const environment = {
     authUser: 'admin',
     authPassword: 'admin',
     testToken: 'token-de-prueba-123',
-    apiGatewayUrl: "http://localhost:8090/api"
+    apiGatewayUrl: "http://localhost:8090/api",
+    authUrl: 'http://localhost:9000/api/login'
 }

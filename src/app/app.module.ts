@@ -25,8 +25,7 @@ import { UsuariosComponent } from './components/templates/usuarios/usuarios.comp
     ProductosComponent,
     LoginComponent,
     DetallesPedidoComponent,
-    AgregarPedidoComponent
-    LoginComponent,
+    AgregarPedidoComponent,
     UsuariosComponent
   ],
   imports: [
