@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../environment/environment';
-import { ClientesRequest } from '../models/clientes';
+import { ClientesRequest, ClientesResponse } from '../models/clientes';
 
 @Injectable({
   providedIn: 'root'
@@ -12,23 +12,23 @@ export class ClientesService {
 
   constructor(private http: HttpClient) { }
 
-  getClientes(): Observable<any> {
-    return this.http.get(this.apiUrl);
+  getClientes(): Observable<ClientesResponse> {
+    return this.http.get<ClientesResponse>(this.apiUrl);
   }
 
-  getCliente(id: number): Observable<any> {
-    return this.http.get(`${this.apiUrl}/${id}`);
+  getCliente(id: number): Observable<ClientesResponse> {
+    return this.http.get<ClientesResponse>(`${this.apiUrl}/${id}`);
   }
 
-  crearCliente(cliente: any): Observable<any> {
-    return this.http.post(this.apiUrl, cliente);
+  crearCliente(cliente: ClientesRequest): Observable<ClientesResponse> {
+    return this.http.post<ClientesResponse>(this.apiUrl, cliente);
   }
 
-  actualizarCliente(id: number, cliente: ClientesRequest): Observable<any> {
-    return this.http.put(`${this.apiUrl}/${id}`, cliente);
+  actualizarCliente(id: number, cliente: ClientesRequest): Observable<ClientesResponse> {
+    return this.http.put<ClientesResponse>(`${this.apiUrl}/${id}`, cliente);
   }
 
-  eliminarCliente(id: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/${id}`);
+  eliminarCliente(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 }
