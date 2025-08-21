@@ -11,6 +11,7 @@ import { PedidosclientesComponent } from './components/templates/pedidosclientes
 import { ProductosComponent } from './components/templates/productos/productos.component';
 import { LoginComponent } from './components/login/login.component';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { UsuariosComponent } from './components/templates/usuarios/usuarios.component';
 
 @NgModule({
   declarations: [
@@ -20,7 +21,8 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
     PedidosComponent,
     PedidosclientesComponent,
     ProductosComponent,
-    LoginComponent
+    LoginComponent,
+    UsuariosComponent
   ],
   imports: [
     BrowserModule,

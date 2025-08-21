@@ -94,7 +94,7 @@
                 <div class="d-flex align-items-center">
                   <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-2"
                        style="width:35px; height:35px; font-weight:600; font-size:0.8rem;">
-                    {{ obtenerNombreCliente(pedido.idCliente).split(' ')[0].charAt(0) }}{{ obtenerNombreCliente(pedido.idCliente).split(' ')[1]?.charAt(0) || '' }}
+                    {{ obtenerNombreCliente(pedido.idCliente).split(' ')[1].charAt(0) }}{{ obtenerNombreCliente(pedido.idCliente).split(' ')[1]?.charAt(0) || '' }}
                   </div>
                   <div>{{ obtenerNombreCliente(pedido.idCliente) }}</div>
                 </div>

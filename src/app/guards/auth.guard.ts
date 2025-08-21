@@ -1,6 +1,7 @@
 import { Injectable } from "@angular/core";
-import { CanActivate, Router } from "@angular/router";
+import { ActivatedRouteSnapshot, CanActivate, Router, RouterStateSnapshot } from "@angular/router";
 import { AuthService } from "../services/auth.service";
+import Swal from "sweetalert2";
 
 /**
  * ==================================================================================
@@ -41,15 +42,19 @@ export class AuthGuard implements CanActivate {
      * 
      * @returns {boolean} true si puede activar la ruta, false si debe redirigir
      */
-    canActivate(): boolean {
+    canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
         // Verificar autenticación usando método sin efectos secundarios
-        if (this.authService.isAuthenticated()) {
-            return true;
-        } else {
-            // Redirigir al login si no está autenticado
-            console.log('🔒 AuthGuard: Usuario no autenticado, redirigiendo al login');
-            this.router.navigate(['/login']);
+        if (!this.authService.isLoggedIn()) {
+            this.authService.logout(); // Limpia el estado si es necesario
             return false;
+        } 
+        const expectedRoles: string[] = route.data['roles'];
+        if (expectedRoles && !this.authService.hasAnyRole(expectedRoles)) {
+            // Si el usuario no tiene los roles esperados, redirigir al login
+            Swal.fire('Acceso denegado', `Hola ${this.authService.getUsername()} no tienes acceso a este recurso!`, 'warning' );
+        return false;
+       
+    }
+    return true
         }
     }
-}
