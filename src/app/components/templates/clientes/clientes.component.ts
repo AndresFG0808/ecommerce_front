@@ -56,7 +56,8 @@ export class ClientesComponent {
     this.isLoading = true;
     this.clienteService.getClientes().subscribe({
       next: (clientes) => {
-        this.clientes = clientes;
+        //Se le hicieron cambios aqui por que se cambio en el service para la respuesta
+        this.clientes = Array.isArray(clientes) ? clientes : [clientes];
         this.isLoading = false;
       },
       error: (err) => {
@@ -148,7 +149,7 @@ export class ClientesComponent {
             this.limpiarFormulario();
 
             // Cerrar el modal de actualizacion antes de mostrar el SwetAlert de exito/error
-            this.cerrarModal()
+            this.cerrarModal();
 
             Swal.fire({
               title: '¡Éxito!',
@@ -195,7 +196,7 @@ export class ClientesComponent {
     this.nuevoTelefono = cliente.telefono;
     this.nuevoDireccion = cliente.direccion ?? '';
 
-    this.abrirModal()
+    this.abrirModal();
   }
 
   /**
@@ -224,17 +225,14 @@ export class ClientesComponent {
               text: 'El tipo ha sido eliminado correctamente.',
               icon: 'success',
               timer: 2000,
-              showConfirmButton: false
-            })
-            this.clientes = this.clientes.filter((cliente) => cliente.id !== id);
-          }
-        })
-        Swal.fire({
-          title: 'Eliminado',
-          text: 'Cliente eliminado correctamente',
-          icon: 'success',
-          timer: 1500,
-          showConfirmButton: false,
+              showConfirmButton: false,
+            });
+            this.clientes = this.clientes.filter(
+              (cliente) => cliente.id !== id
+            );
+          },
+          error: (err) =>
+            console.error("Error al eliminar cliente: ", err)
         });
       }
     });
