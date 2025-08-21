@@ -7,6 +7,8 @@ import { PedidosComponent } from './components/templates/pedidos/pedidos.compone
 import { ProductosComponent } from './components/templates/productos/productos.component';
 import { LoginComponent } from './components/login/login.component';
 import { AuthGuard } from './guards/auth.guard';
+import { DetallesPedidoComponent } from './components/templates/pedidos/detalles-pedido/detalles-pedido.component';
+import { AgregarPedidoComponent } from './components/templates/pedidos/agregar-pedido/agregar-pedido.component';
 
 const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -30,6 +32,8 @@ const routes: Routes = [
       { path: 'pedidosclientes', component: PedidosclientesComponent },
       { path: 'clientes', component: ClientesComponent },
       { path: 'pedidos', component: PedidosComponent },
+      { path: 'pedidos/detalles', component: DetallesPedidoComponent },
+      { path: 'pedidos/agregar', component: AgregarPedidoComponent },
       { path: 'productos', component: ProductosComponent },
     ],
   },
