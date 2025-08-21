@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { environment } from '../environment/environment';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { PedidosResponse } from '../models/pedidos';
+import { PedidosRequest, PedidosResponse } from '../models/pedidos';
 
 
 
@@ -22,8 +22,12 @@ export class PedidosService {
            return this.http.get(`${this.apiUrl}/${id}`);
          }
        
-         crearCliente(cliente: any): Observable<any> {
-           return this.http.post(this.apiUrl, cliente);
+         crearPedido(cliente: PedidosRequest): Observable<PedidosResponse> {
+           return this.http.post<PedidosResponse>(this.apiUrl, cliente);
+         }
+
+         cambiarEstado(id: number, estado: string): Observable<PedidosResponse> {
+           return this.http.patch<PedidosResponse>(`${this.apiUrl}/estado/${estado}/${id}`, null,);
          }
        
          

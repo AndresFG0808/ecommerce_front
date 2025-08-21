@@ -4,6 +4,7 @@ import { ClientesResponse } from '../../../models/clientes';
 import Swal from 'sweetalert2';
 import { PedidosService } from '../../../services/pedidos.service';
 import { Router } from '@angular/router';
+import { AlertService } from '../../../services/alert.service';
 
 /**
  * Componente para gestionar la información de los pedidos.
@@ -18,36 +19,111 @@ import { Router } from '@angular/router';
   selector: 'app-pedidos',
   standalone: false,
   templateUrl: './pedidos.component.html',
-  styleUrl: './pedidos.component.css'
+  styleUrl: './pedidos.component.css',
 })
 export class PedidosComponent implements OnInit {
-   pedidos: PedidosResponse[] = [];
-    isLoading = true;
+  pedidos: PedidosResponse[] = [];
+  isLoading = true;
+  open = false;
+  pedidoSelect: PedidosResponse | undefined;
 
-    constructor(private pedidosService: PedidosService, private router: Router) {}
+  estados = ['PENDIENTE', 'ENVIADO', 'ENTREGADO', 'CANCELADO'];
+
+  estadosAux = ['PENDIENTE', 'ENVIADO', 'ENTREGADO', 'CANCELADO'];
+
+  estado: string = '';
+
+  constructor(
+    private pedidosService: PedidosService,
+    private router: Router,
+    private alertService: AlertService
+  ) {}
 
   ngOnInit(): void {
     this.pedidosService.getPedidos().subscribe({
       next: (data) => {
-        console.log("data", data)
-        this.pedidos = data;
+        console.log('data', data);
+        this.pedidos = data.filter((item)=> item.estado !== 'CANCELADO');
         this.isLoading = false;
       },
       error: (error) => {
-          console.error('Error: ', error);
-            this.isLoading = false;
-      }
-    })
+        console.error('Error: ', error);
+        this.isLoading = false;
+      },
+    });
   }
 
-   verDetalles(pedido: PedidosResponse) {
+  verDetalles(pedido: PedidosResponse) {
     // Navega pasando el objeto completo por state
     localStorage.setItem('pedidoDetalles', JSON.stringify(pedido));
-    this.router.navigate(['/dashboard/pedidos/detalles'], { state: { pedido } });
+    this.router.navigate(['/dashboard/pedidos/detalles'], {
+      state: { pedido },
+    });
   }
 
+  toAgregarPedido(): void {
+    this.router.navigate(['/dashboard/pedidos/agregar']);
+  }
+
+  openModal(id: number): void {
+    const pedido = this.pedidos.find((item) => item.idPedidos === id);
+    if(pedido?.estado === 'ENTREGADO'){
+      this.alertService.alertPositioned("Info", "Este pedido ya no se puede modificar", "top-end", "info")
+    }else{
+      if (pedido) {
+      this.estados = this.estados.filter((item) => item !== pedido.estado);
+      this.pedidoSelect = pedido;
+      this.open = true;
+    }
+
+    }
+  }
+
+  closeModal(): void {
+    this.open = false;
+    this.estados = this.estadosAux;
+    this.pedidoSelect = undefined;
+    this.estado = '';
+  }
+
+  cambiarEstado(): void {
+    if (!this.pedidoSelect) return;
+
+    if (!this.estado) {
+      this.alertService.alertPositioned(
+        'Error',
+        'Selecciona un estado',
+        'top-end',
+        'error'
+      );
+    } else {
+      this.pedidosService
+        .cambiarEstado(this.pedidoSelect.idPedidos, this.estado)
+        .subscribe({
+          next: (data) => {
+            const index = this.pedidos.findIndex(
+              (p) => p.idPedidos === this.pedidoSelect!.idPedidos
+            );
+            if (index !== -1) {
+              this.pedidos[index] = data;
+
+              this.pedidos = this.pedidos.filter((item)=> item.estado!== 'CANCELADO');
+            }
+            this.alertService.alertMessage(
+              'Exito',
+              'El estado ha cambiado con éxito'
+            );
+            this.closeModal();
+          },
+          error: (error) => {
+            alert('error');
+          },
+        });
+    }
+  }
 
   /* 
+  this.router.navigate(['/dashboard/pedidos']);
   <div *ngIf="error" class="alert alert-danger">
     {{ error }}
   </div>
@@ -78,53 +154,54 @@ export class PedidosComponent implements OnInit {
   
   */
 
-
   formatearPrecio(precio: number): string {
-    return precio.toLocaleString('es-MX', { 
-      style: 'currency', 
+    return precio.toLocaleString('es-MX', {
+      style: 'currency',
       currency: 'MXN',
-      minimumFractionDigits: 2 
+      minimumFractionDigits: 2,
     });
   }
 
-  
   formatearFecha(fecha: Date): string {
     return new Date(fecha).toLocaleDateString('es-MX', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     });
   }
 
-  
   obtenerClaseEstado(estado: string): string {
     switch (estado) {
-      case 'PENDIENTE': return 'bg-warning text-dark';
-      case 'ENVIADO': return 'bg-info';
-      case 'ENTREGADO': return 'bg-success';
-      case 'CANCELADO': return 'bg-danger';
-      default: return 'bg-secondary';
+      case 'PENDIENTE':
+        return 'bg-warning text-dark';
+      case 'ENVIADO':
+        return 'bg-info';
+      case 'ENTREGADO':
+        return 'bg-success';
+      case 'CANCELADO':
+        return 'bg-danger';
+      default:
+        return 'bg-secondary';
     }
   }
 
-  
   obtenerIconoEstado(estado: string): string {
     switch (estado) {
-      case 'PENDIENTE': return 'bi-clock';
-      case 'ENVIADO': return 'bi-truck';
-      case 'ENTREGADO': return 'bi-check-circle';
-      case 'CANCELADO': return 'bi-x-circle';
-      default: return 'bi-question-circle';
+      case 'PENDIENTE':
+        return 'bi-clock';
+      case 'ENVIADO':
+        return 'bi-truck';
+      case 'ENTREGADO':
+        return 'bi-check-circle';
+      case 'CANCELADO':
+        return 'bi-x-circle';
+      default:
+        return 'bi-question-circle';
     }
   }
-
-
-
-  
 }
-
 
 /* 
 
