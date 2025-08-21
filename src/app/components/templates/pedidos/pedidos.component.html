@@ -4,7 +4,7 @@
       <i class="bi bi-cart-check text-primary me-2"></i>
       Gestión de pedidos
     </h3>
-    <button class="btn btn-success">
+    <button class="btn btn-success" (click)="toAgregarPedido()">
       <i class="bi bi-plus-circle me-1"></i> Nuevo Pedido
     </button>
   </div>
@@ -57,8 +57,9 @@
                 <small>{{ pedido.fechaCreacion }}</small>
               </td>
               <td>
-                <span
+                <button
                   class="badge"
+                  (click)="openModal(pedido.idPedidos)"
                   [ngClass]="
                     'bg-' + obtenerClaseEstado(pedido.estado).split('bg-')[1]
                   "
@@ -68,7 +69,7 @@
                     class="me-1"
                   ></i>
                   {{ pedido.estado }}
-                </span>
+                </button>
               </td>
               <td class="text-center">
                 <div class="btn-group" role="group">
@@ -115,5 +116,62 @@
         <button class="btn btn-primary">Crear primer pedido</button>
       </div>
     </ng-template>
+  </div>
+</div>
+
+<div *ngIf="open" class="modal-backdrop fade show"></div>
+<div
+  *ngIf="open"
+  class="modal d-block"
+  id="modalNuevoCliente"
+  tabindex="-1"
+  aria-labelledby="modalNuevoClienteLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <form (ngSubmit)="cambiarEstado()"  autocomplete="off" novalidate>
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalNuevoClienteLabel">
+            Cambiar de estado del pedido #{{ pedidoSelect?.idPedidos }}
+          </h5>
+          <button
+            type="button"
+            class="btn-close"
+            aria-label="Close"
+            (click)="closeModal()"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <p>Estado actual: {{pedidoSelect!.estado}}</p>
+              <label class="form-label">Nuevo estado:</label>
+              <select
+                id="estado"
+                class="form-select"
+                [(ngModel)]="estado"
+                name="estado"
+                required
+              >
+                <option *ngFor="let est of estados" [value]="est">
+                  {{ est }}
+                </option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            (click)="closeModal()"
+          >
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn-primary">Guardar</button>
+        </div>
+      </form>
+    </div>
   </div>
 </div>

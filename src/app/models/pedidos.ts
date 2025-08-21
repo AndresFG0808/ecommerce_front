@@ -3,6 +3,8 @@ export interface ProductoRequest {
   idProducto: number;
   precio: number;
   cantidad: number;
+  stock: number,
+  nombre: string
 }
 
 // Producto dentro del response
