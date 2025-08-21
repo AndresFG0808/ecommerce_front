@@ -11,6 +11,8 @@ import { PedidosclientesComponent } from './components/templates/pedidosclientes
 import { ProductosComponent } from './components/templates/productos/productos.component';
 import { LoginComponent } from './components/login/login.component';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { DetallesPedidoComponent } from './components/templates/pedidos/detalles-pedido/detalles-pedido.component';
+import { AgregarPedidoComponent } from './components/templates/pedidos/agregar-pedido/agregar-pedido.component';
 import { UsuariosComponent } from './components/templates/usuarios/usuarios.component';
 
 @NgModule({
@@ -21,6 +23,9 @@ import { UsuariosComponent } from './components/templates/usuarios/usuarios.comp
     PedidosComponent,
     PedidosclientesComponent,
     ProductosComponent,
+    LoginComponent,
+    DetallesPedidoComponent,
+    AgregarPedidoComponent
     LoginComponent,
     UsuariosComponent
   ],

@@ -7,6 +7,8 @@ import { PedidosComponent } from './components/templates/pedidos/pedidos.compone
 import { ProductosComponent } from './components/templates/productos/productos.component';
 import { LoginComponent } from './components/login/login.component';
 import { AuthGuard } from './guards/auth.guard';
+import { DetallesPedidoComponent } from './components/templates/pedidos/detalles-pedido/detalles-pedido.component';
+import { AgregarPedidoComponent } from './components/templates/pedidos/agregar-pedido/agregar-pedido.component';
 import { UsuariosComponent } from './components/templates/usuarios/usuarios.component';
 
 export const ROLES = {
@@ -37,6 +39,8 @@ const routes: Routes = [
       { path: 'pedidosclientes', component: PedidosclientesComponent },
       { path: 'clientes', component: ClientesComponent },
       { path: 'pedidos', component: PedidosComponent },
+      { path: 'pedidos/detalles', component: DetallesPedidoComponent },
+      { path: 'pedidos/agregar', component: AgregarPedidoComponent },
       { path: 'productos', component: ProductosComponent },
       {path:  'usuarios', component: UsuariosComponent, canActivate: [AuthGuard], data: { roles: [ROLES.ADMIN] } },
     ],

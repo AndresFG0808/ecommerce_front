@@ -32,41 +32,8 @@ export class PedidosclientesComponent implements OnInit {
 
   // Lista completa de todos los pedidos en el sistema
   pedidos: PedidosResponse[] = [
-    {
-      idPedidos: 1,
-      idCliente: 1,
-      total: 17299.49,
-      fechaCreacion: new Date('2025-01-15T10:30:00'),
-      estado: 'PENDIENTE'
-    },
-    {
-      idPedidos: 2,
-      idCliente: 2,
-      total: 4798.50,
-      fechaCreacion: new Date('2025-01-14T15:45:00'),
-      estado: 'ENVIADO'
-    },
-    {
-      idPedidos: 3,
-      idCliente: 3,
-      total: 8999.99,
-      fechaCreacion: new Date('2025-01-13T09:15:00'),
-      estado: 'ENTREGADO'
-    },
-    {
-      idPedidos: 4,
-      idCliente: 1,
-      total: 1299.50,
-      fechaCreacion: new Date('2025-01-12T16:20:00'),
-      estado: 'CANCELADO'
-    },
-    {
-      idPedidos: 5,
-      idCliente: 2,
-      total: 2599.00,
-      fechaCreacion: new Date('2025-01-11T14:15:00'),
-      estado: 'ENTREGADO'
-    }
+   
+    
   ];
 
   constructor() {}

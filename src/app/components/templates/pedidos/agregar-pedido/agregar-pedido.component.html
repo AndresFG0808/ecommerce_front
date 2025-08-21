@@ -1,0 +1,129 @@
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h3 class="m-0">
+    <i class="bi bi-cart-check text-primary me-2"></i>
+    Nuevo pedido
+  </h3>
+</div>
+
+<div *ngIf="isLoading" class="d-flex justify-content-center py-5">
+  <div class="spinner-border text-primary" role="status">
+    <span class="visually-hidden">Cargando...</span>
+  </div>
+</div>
+
+<div *ngIf="!isLoading" class="container my-4">
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <form>
+        <div class="mb-3">
+          <label for="cliente" class="form-label">Cliente</label>
+          <select
+            name="tipo"
+            [(ngModel)]="pedido.idCliente"
+            #tipo="ngModel"
+            required
+            class="form-control"
+          >
+            <option value="" disabled selected>Seleccione un cliente</option>
+            <option *ngFor="let cliente of clientes" [value]="cliente.id">
+              {{`${cliente.nombre} ${cliente.apellido}` }}
+            </option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label for="fechaCreacion" class="form-label"
+            >Fecha de Creación</label
+          >
+          <input
+            type="date"
+            id="fechaCreacion"
+            name="fechaCreacion"
+            class="form-control"
+              [(ngModel)]="pedido.fechaCreacion"
+          #nombre="ngModel"
+            required
+          />
+        </div>
+
+        <div class="mb-3">
+          <select id="estado" name="estado" class="form-select" required>
+            <option value="">-- Seleccione un estado --</option>
+            <option value="PENDIENTE">Pendiente</option>
+            <option value="PAGADO">Pagado</option>
+            <option value="CANCELADO">Cancelado</option>
+          </select>
+        </div>
+
+        <!-- Productos -->
+        <h6 class="mt-4">Productos</h6>
+        <div class="table-responsive mb-3">
+          <table class="table table-bordered align-middle">
+            <thead class="table-light">
+              <tr>
+                <th>Nombre</th>
+                <th>Descripción</th>
+                <th>Cantidad</th>
+                <th>Precio</th>
+                <th>Subtotal</th>
+                <th class="text-center">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Producto ejemplo (en Angular aquí iría un *ngFor) -->
+              <tr>
+                <td>
+                  <input
+                    type="text"
+                    class="form-control"
+                    placeholder="Nombre del producto"
+                  />
+                </td>
+                <td>
+                  <input
+                    type="text"
+                    class="form-control"
+                    placeholder="Descripción"
+                  />
+                </td>
+                <td>
+                  <input type="number" class="form-control" min="1" value="1" />
+                </td>
+                <td>
+                  <input
+                    type="number"
+                    class="form-control"
+                    min="0"
+                    step="0.01"
+                    placeholder="Precio"
+                  />
+                </td>
+                <td>$0.00</td>
+                <td class="text-center">
+                  <button type="button" class="btn btn-sm btn-danger">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Total -->
+        <div class="text-end mb-3">
+          <h5>Total: <span class="fw-bold text-success">$0.00</span></h5>
+        </div>
+
+        <!-- Botones -->
+        <div class="d-flex justify-content-between">
+          <a href="/dashboard/pedidos" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Cancelar
+          </a>
+          <button type="submit" class="btn btn-success">
+            <i class="bi bi-save"></i> Guardar Pedido
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

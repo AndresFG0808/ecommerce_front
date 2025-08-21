@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { PedidosRequest, PedidosResponse } from '../../../models/pedidos';
 import { ClientesResponse } from '../../../models/clientes';
 import Swal from 'sweetalert2';
+import { PedidosService } from '../../../services/pedidos.service';
+import { Router } from '@angular/router';
 
 /**
  * Componente para gestionar la información de los pedidos.
@@ -19,7 +21,117 @@ import Swal from 'sweetalert2';
   styleUrl: './pedidos.component.css'
 })
 export class PedidosComponent implements OnInit {
-  // Array con los pedidos que se muestran en la tabla.
+   pedidos: PedidosResponse[] = [];
+    isLoading = true;
+
+    constructor(private pedidosService: PedidosService, private router: Router) {}
+
+  ngOnInit(): void {
+    this.pedidosService.getPedidos().subscribe({
+      next: (data) => {
+        console.log("data", data)
+        this.pedidos = data;
+        this.isLoading = false;
+      },
+      error: (error) => {
+          console.error('Error: ', error);
+            this.isLoading = false;
+      }
+    })
+  }
+
+   verDetalles(pedido: PedidosResponse) {
+    // Navega pasando el objeto completo por state
+    localStorage.setItem('pedidoDetalles', JSON.stringify(pedido));
+    this.router.navigate(['/dashboard/pedidos/detalles'], { state: { pedido } });
+  }
+
+
+  /* 
+  <div *ngIf="error" class="alert alert-danger">
+    {{ error }}
+  </div>
+
+
+
+   this.movimientoService.getMovimientos().subscribe({
+      next: (data) => {
+        this.movimientos = data;
+
+        this.tipoService.getTipos().subscribe({
+          next: (data) => {
+            this.tipos = data;
+            this.getPokemon();
+            this.loading = false;
+          },
+          error: (err) => {
+            console.error('Error al cargar tarjetas', err);
+            this.loading = false;
+          },
+        });
+      },
+      error: (err) => {
+        console.error('Error al cargar tarjetas', err);
+        this.loading = false;
+      },
+    });
+  
+  */
+
+
+  formatearPrecio(precio: number): string {
+    return precio.toLocaleString('es-MX', { 
+      style: 'currency', 
+      currency: 'MXN',
+      minimumFractionDigits: 2 
+    });
+  }
+
+  
+  formatearFecha(fecha: Date): string {
+    return new Date(fecha).toLocaleDateString('es-MX', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
+
+  
+  obtenerClaseEstado(estado: string): string {
+    switch (estado) {
+      case 'PENDIENTE': return 'bg-warning text-dark';
+      case 'ENVIADO': return 'bg-info';
+      case 'ENTREGADO': return 'bg-success';
+      case 'CANCELADO': return 'bg-danger';
+      default: return 'bg-secondary';
+    }
+  }
+
+  
+  obtenerIconoEstado(estado: string): string {
+    switch (estado) {
+      case 'PENDIENTE': return 'bi-clock';
+      case 'ENVIADO': return 'bi-truck';
+      case 'ENTREGADO': return 'bi-check-circle';
+      case 'CANCELADO': return 'bi-x-circle';
+      default: return 'bi-question-circle';
+    }
+  }
+
+
+
+  
+}
+
+
+/* 
+
+
+
+
+// Array con los pedidos que se muestran en la tabla.
   // Tipo PedidosResponse porque los objetos incluyen el ID generado.
   pedidos: PedidosResponse[] = [
     {
@@ -86,25 +198,15 @@ export class PedidosComponent implements OnInit {
   // ID del pedido que se está editando (0 = no hay edición)
   pedidoEditandoId = 0;
 
-  /**
-   * Constructor vacío (no se inyecta servicio aquí).
-   * Si en el futuro se integra un servicio HTTP, inyectarlo en el constructor.
-   */
+  
   constructor() {}
 
-  /**
-   * Método llamado al inicializar el componente.
-   * Aquí se arrancan las cargas iniciales (p. ej. llamar al servicio).
-   */
+  
   ngOnInit(): void {
     this.cargarPedidos();
   }
 
-  /**
-   * Simula la carga de pedidos desde un servicio.
-   * - Marca isLoading mientras "carga".
-   * - En producción reemplazar la simulación por un servicio HTTP.
-   */
+  
   cargarPedidos(): void {
     this.isLoading = true;
     // Simulación: pequeña espera para imitar petición al servidor
@@ -113,12 +215,7 @@ export class PedidosComponent implements OnInit {
     }, 500);
   }
 
-  /**
-   * Validaciones específicas para pedidos según constraints de BD.
-   * - ID Cliente: debe existir en la lista de clientes (foreign key)
-   * - Total: mayor o igual a 0 (por defecto 0)
-   * - Estado: debe ser uno de los valores permitidos
-   */
+  
   validarFormularioPedido(): { valido: boolean; error?: string } {
     const p = this.nuevoPedido;
 
@@ -138,11 +235,7 @@ export class PedidosComponent implements OnInit {
     return { valido: true };
   }
 
-  /**
-   * Registrar o actualizar un pedido según el estado editandoPedido.
-   * - Cuando editandoPedido === true actualiza el pedido existente.
-   * - Cuando editandoPedido === false crea uno nuevo y lo agrega al array.
-   */
+  
   registrarPedido(): void {
     const valid = this.validarFormularioPedido();
     if (!valid.valido) {
@@ -183,11 +276,7 @@ export class PedidosComponent implements OnInit {
     }
   }
 
-  /**
-   * Preparar el formulario para editar un pedido.
-   * - Rellena el modelo nuevoPedido con los datos del pedido seleccionado.
-   * - Abre el modal en modo edición.
-   */
+  
   editarPedido(pedido: PedidosResponse): void {
     this.editandoPedido = true;
     this.pedidoEditandoId = pedido.idPedidos;
@@ -200,10 +289,7 @@ export class PedidosComponent implements OnInit {
     this.abrirModal();
   }
 
-  /**
-   * Eliminar un pedido de la lista (simulado).
-   * - En producción llamar al servicio para eliminar en el backend.
-   */
+  
   eliminarPedido(id: number): void {
     Swal.fire({
       title: '¿Estás seguro?',
@@ -222,9 +308,7 @@ export class PedidosComponent implements OnInit {
     });
   }
 
-  /**
-   * Mostrar los detalles de un pedido en un modal informativo.
-   */
+  
   verDetalles(pedido: PedidosResponse): void {
     const cliente = this.obtenerNombreCliente(pedido.idCliente);
     Swal.fire({
@@ -243,49 +327,37 @@ export class PedidosComponent implements OnInit {
     });
   }
 
-  /**
-   * Restablece el modelo del formulario al estado inicial.
-   */
+  
   limpiarFormulario(): void {
     this.nuevoPedido = { idCliente: 0, total: 0, fechaCreacion: new Date(), estado: 'PENDIENTE' };
     this.editandoPedido = false;
     this.pedidoEditandoId = 0;
   }
 
-  /**
-   * Abre el modal bootstrap para crear/editar pedido.
-   */
+  
   abrirModal(): void {
     const modal = document.getElementById('modalNuevoPedido');
     if (modal) (window as any).bootstrap.Modal.getOrCreateInstance(modal).show();
   }
 
-  /**
-   * Cierra el modal bootstrap de pedido.
-   */
+  
   cerrarModal(): void {
     const modal = document.getElementById('modalNuevoPedido');
     if (modal) (window as any).bootstrap.Modal.getOrCreateInstance(modal).hide();
   }
 
-  /**
-   * Ejecutado cuando el modal se oculta.
-   */
+  
   onModalHidden(): void {
     if (!this.editandoPedido) this.limpiarFormulario();
   }
 
-  /**
-   * Obtiene el nombre completo del cliente por su ID.
-   */
+  
   obtenerNombreCliente(idCliente: number): string {
     const cliente = this.clientes.find(c => c.id === idCliente);
     return cliente ? `${cliente.nombre} ${cliente.apellido}` : `Cliente #${idCliente}`;
   }
 
-  /**
-   * Formatea el precio para mostrar como moneda.
-   */
+  
   formatearPrecio(precio: number): string {
     return precio.toLocaleString('es-MX', { 
       style: 'currency', 
@@ -294,9 +366,7 @@ export class PedidosComponent implements OnInit {
     });
   }
 
-  /**
-   * Formatea la fecha para mostrar en formato legible.
-   */
+  
   formatearFecha(fecha: Date): string {
     return new Date(fecha).toLocaleDateString('es-MX', {
       year: 'numeric',
@@ -307,9 +377,7 @@ export class PedidosComponent implements OnInit {
     });
   }
 
-  /**
-   * Obtiene la clase CSS para el badge del estado.
-   */
+  
   obtenerClaseEstado(estado: string): string {
     switch (estado) {
       case 'PENDIENTE': return 'bg-warning text-dark';
@@ -320,9 +388,7 @@ export class PedidosComponent implements OnInit {
     }
   }
 
-  /**
-   * Obtiene el ícono para cada estado de pedido.
-   */
+  
   obtenerIconoEstado(estado: string): string {
     switch (estado) {
       case 'PENDIENTE': return 'bi-clock';
@@ -332,4 +398,6 @@ export class PedidosComponent implements OnInit {
       default: return 'bi-question-circle';
     }
   }
-}
+
+
+*/
