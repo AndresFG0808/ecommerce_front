@@ -10,6 +10,9 @@ import Swal from 'sweetalert2';
   styleUrl: './dashboard.component.css'
 })
 export class DashboardComponent {
+
+username: string | null = null;
+
   constructor(private authService: AuthService, private router: Router) {}
 
   /**
@@ -25,6 +28,12 @@ export class DashboardComponent {
    * - Mostrar confirmación después de la limpieza
    * - El authService.logout() ya incluye la navegación
    */
+
+
+   
+
+
+
   logout(): void {
     Swal.fire({
       title: "Cerrar sesión",

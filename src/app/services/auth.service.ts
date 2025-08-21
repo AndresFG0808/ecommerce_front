@@ -54,6 +54,7 @@ import Swal from 'sweetalert2';
 export class AuthService {
   private readonly TOKEN_KEY = 'acces_token';
   private intervalId: any;
+  private payLoad: any | null = null; // Variable para almacenar el payload del token decodificado
 
   /**
    * PROBLEMA RESUELTO: Error "Cannot read properties of undefined" al recargar página
@@ -77,6 +78,7 @@ export class AuthService {
     // Se usa checkInitialToken() en lugar de hasToken() para evitar efectos secundarios
     const hasValidToken = this.checkInitialToken();
     this.isLoggedInSubject.next(hasValidToken);
+    this.decodeToken(); // Decodificar el token al inicializar el servicio
     
     // Si hay un token válido al inicializar, comenzar el monitoreo de expiración
     if (hasValidToken) {
@@ -85,8 +87,9 @@ export class AuthService {
   }
 
   // Obtener el observable del estado de autenticación
-  get isLoggedIn$(): Observable<boolean> {
-    return this.isLoggedInSubject.asObservable();
+  isLoggedIn(): boolean {
+    const token = this.getToken();
+    return !!token && !this.isTokenExpired();
   }
 
   /**
@@ -365,4 +368,50 @@ export class AuthService {
       authenticated: authenticated
     };
   }
+
+private decodeToken(): void{
+  const token = this.getToken();
+  if (token) {
+    try{
+      this.payLoad = JSON.parse(atob(token.split('.')[1]));
+    }catch (e){
+      this.payLoad = null; // Si hay un error al decodificar, establecer payLoad como null
+    }
+
+}else {
+    this.payLoad = null; // Si no hay token, establecer payLoad como null
+  }
+}
+
+getUsername(): string | null {
+  const token = this.getToken();
+  if(!token) return null;
+  try{
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    return payload.sub|| null; // Retorna el username del payload o null si no existe
+  }catch (e) {
+    console.error('Error leyendo username del token:', e);
+    return null; // Si hay un error al decodificar, retornar null
+  }
+}
+
+getRoles(): string[] {
+  if(!this.payLoad) this.decodeToken(); // Asegurarse de que payLoad esté decodificado{
+    return this.payLoad?.roles || []; // Si payLoad es null, retornar un array vacío
+  }
+
+  hasRole(role: string): boolean {
+  return this.getRoles().includes(role);
+  
+  }
+
+  hasAnyRole(roles: string[]): boolean {
+    return roles.some(r => this.getRoles().includes(r));
+  }
+
+
+
+
+
+
 }

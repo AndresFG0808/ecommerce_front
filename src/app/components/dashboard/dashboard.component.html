@@ -68,6 +68,7 @@
           <!-- (click)="logout()" -->
           <button class="btn btn-outline-danger btn-sm" (click)="logout()">
             <i class="bi bi-box-arrow-right me-1"></i>
+            <span *ngIf="username">Hola, {{ username }}!</span> 
             Salir
           </button>
         </div>

@@ -16,6 +16,11 @@
     <p>{{ producto.descripcion }}</p>
     <p><strong>Precio:</strong> ${{ producto.precio }}</p>
     <p><strong>Stock:</strong> {{ producto.stock }}</p>
+    <p><strong *ngIf="muestraAcciones">Aciones</strong> 
+
+
+
+
     <div class="botones-tarjeta">
     <button (click)="editProducto(producto)">Editar</button>
     <button (click)="deleteProducto(producto.id)">Eliminar</button>
@@ -50,11 +55,13 @@
     <div *ngIf="productoForm.get('stock')?.invalid && productoForm.get('stock')?.touched">
       <small>El stock debe ser un número entero mayor o igual a 0.</small>
     </div>
-
+<div *ngIf="muestraAcciones">
+    <label>Acciones:</label>
     <button type="submit" [disabled]="productoForm.invalid">
       {{ isEditMode ? 'Actualizar' : 'Crear' }}
     </button>
     <button type="button" (click)="resetForm()">Cancelar</button>
+    </div>
   </form>
 </div>
 

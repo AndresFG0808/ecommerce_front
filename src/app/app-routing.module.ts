@@ -7,6 +7,13 @@ import { PedidosComponent } from './components/templates/pedidos/pedidos.compone
 import { ProductosComponent } from './components/templates/productos/productos.component';
 import { LoginComponent } from './components/login/login.component';
 import { AuthGuard } from './guards/auth.guard';
+import { UsuariosComponent } from './components/templates/usuarios/usuarios.component';
+
+export const ROLES = {
+  ADMIN: 'ROLE_ADMIN',
+  USER: 'ROLE_USER',
+  // agrega más roles si los necesitas
+};
 
 const routes: Routes = [
   { path: 'login', component: LoginComponent },
@@ -31,6 +38,7 @@ const routes: Routes = [
       { path: 'clientes', component: ClientesComponent },
       { path: 'pedidos', component: PedidosComponent },
       { path: 'productos', component: ProductosComponent },
+      {path:  'usuarios', component: UsuariosComponent, canActivate: [AuthGuard], data: { roles: [ROLES.ADMIN] } },
     ],
   },
   { path: '', redirectTo: '/login', pathMatch: 'full' },

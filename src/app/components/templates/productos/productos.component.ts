@@ -3,6 +3,7 @@ import { ProductosRequest, ProductosResponse } from '../../../models/productos';
 import Swal from 'sweetalert2';
 import { ProductoService } from '../../../services/producto.service';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { AuthService } from '../../../services/auth.service';
 
 /**
  * Componente para manejar la visualización y gestión de productos.
@@ -33,7 +34,8 @@ export class ProductosComponent implements OnInit {
    */
   constructor(
     private productoService: ProductoService,
-    private formBuilder: FormBuilder
+    private formBuilder: FormBuilder,
+    private authService: AuthService
   ) {
     this.productoForm = this.formBuilder.group({
       nombre: ['', [Validators.required, Validators.minLength(20), Validators.maxLength(30)]],
@@ -49,6 +51,9 @@ export class ProductosComponent implements OnInit {
 
   ngOnInit(): void {
     this.cargarProductos();
+    if(this.authService.hasRole('ROLE_ADMIN')) {
+      this.muestraAcciones = true;
+    }
   }
 
   /**
