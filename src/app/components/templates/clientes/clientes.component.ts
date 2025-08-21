@@ -231,14 +231,8 @@ export class ClientesComponent {
               (cliente) => cliente.id !== id
             );
           },
-          error: () =>
-            Swal.fire({
-              title: 'Error',
-              text: 'Cliente no se pudo eliminar',
-              icon: 'error',
-              confirmButtonColor: 'rgba(51, 105, 221, 1)',
-              confirmButtonText: "Ok"
-            }),
+          error: (err) =>
+            console.error("Error al eliminar cliente: ", err)
         });
       }
     });

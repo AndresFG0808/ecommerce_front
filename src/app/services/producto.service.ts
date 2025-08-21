@@ -17,7 +17,7 @@ export class ProductoService {
 /**
     * URL base de la API para productos, obtenida del archivo de entorno.
  */
-    private apiUrl: string = environment.apiUrl + '/productos/';
+    private apiUrl: string = environment.apiGatewayUrl + '/productos/';
   
     
 /**
