@@ -20,17 +20,11 @@ export class LoginComponent {
   constructor(private router: Router, private authService: AuthService) {} // Dar acceso restringido solo a este componente
 
   onLogin() {
-    const credentials: LoginRequest = {
-      username: this.username,
-      password: this.password
-    }
 
     // Metodo que se ejecutara al dar clic en el boton de inciar
     this.isLoading = true;
 
-    this.authService.login
-
-    this.authService.login(credentials).subscribe({
+    this.authService.login(this.username, this.password).subscribe({
       next: (success) => {
         if(success) {
           this.router.navigate(['/dashboard']);

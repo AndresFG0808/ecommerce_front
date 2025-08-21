@@ -16,5 +16,17 @@ export const environment = {
     authPassword: 'admin',
     testToken: 'token-de-prueba-123',
     apiGatewayUrl: "http://localhost:8090/api",
-    authUrl: 'http://localhost:9000/api/login'
+    authUrl: 'http://localhost:9000/api/login',
+    authCreateUser: 'http://localhost:9000/admin/usuarios' //Para crear usuarios
 }
+
+/**
+ * Post para crar usuarios:
+ * {
+ *  "username": "nuevouser",
+ *  "password": "password123",
+ *  "roles": ["ROLE_USER"]
+ * }
+ * 
+ * 
+ */

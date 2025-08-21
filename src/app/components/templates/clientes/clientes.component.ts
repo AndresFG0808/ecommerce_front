@@ -111,6 +111,7 @@ export class ClientesComponent {
             if (index !== -1) {
               this.clientes[index] = clienteActualizado;
             }
+            
             this.limpiarFormulario();
             // Cerrar el modal de actualizacion antes de mostrar el SwetAlert de exito/error
             this.cerrarModal();
@@ -125,14 +126,9 @@ export class ClientesComponent {
               allowEscapeKey: true,
             });
           },
-          error: (err) =>
-            Swal.fire({
-              title: 'Error',
-              text: 'Error al actualizar el tipo',
-              icon: 'error',
-              confirmButtonColor: '#d33',
-              confirmButtonText: 'Cerrar',
-            }),
+          error: (err) => {
+            console.error("Error al actualizar un cliente: ", err);
+          },
         });
     } else {
       this.clienteService

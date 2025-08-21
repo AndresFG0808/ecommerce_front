@@ -7,55 +7,62 @@ import Swal from 'sweetalert2';
   selector: 'app-dashboard',
   standalone: false,
   templateUrl: './dashboard.component.html',
-  styleUrl: './dashboard.component.css'
+  styleUrl: './dashboard.component.css',
 })
 export class DashboardComponent {
-
-username: string | null = null;
+  username: string | null = null;
+  roles: string | null = null;
 
   constructor(private authService: AuthService, private router: Router) {}
 
   /**
    * MÉTODO CORREGIDO: logout()
-   * 
+   *
    * PROBLEMA IDENTIFICADO (17/08/2025):
    * - No se llamaba authService.logout() para limpiar el token
    * - Solo navegaba al login sin limpiar el estado de autenticación
    * - Los usuarios podían volver a acceder usando el botón "atrás"
-   * 
+   *
    * SOLUCIÓN:
    * - Llamar primero authService.logout() para limpiar tokens
    * - Mostrar confirmación después de la limpieza
    * - El authService.logout() ya incluye la navegación
    */
 
-
-   
-
-
+  ngOnInit(): void {
+    this.username = this.authService.getUsername();
+    const getroles = this.authService.getRoles().join(', ');
+    if (getroles === 'ROLE_ADMIN') {
+      this.roles = 'ADMINISTRADOR'
+    } else if (getroles === 'ROLE_USER'){
+      this.roles = 'USUARIO'
+    } else  {
+      this.roles = 'identifiquese!'
+    } 
+  }
 
   logout(): void {
     Swal.fire({
-      title: "Cerrar sesión",
-      text: "¿Estás seguro de cerrar sesión?",
+      title: 'Cerrar sesión',
+      text: '¿Estás seguro de cerrar sesión?',
       icon: 'question',
       showCancelButton: true,
       confirmButtonColor: '#3085d6',
       cancelButtonColor: '#d33',
       confirmButtonText: 'Sí, cerrar sesión',
-      cancelButtonText: 'Cancelar'
+      cancelButtonText: 'Cancelar',
     }).then((result) => {
-      if(result.isConfirmed) {
+      if (result.isConfirmed) {
         // CORRECCIÓN: Llamar al authService para limpiar tokens y estado
         this.authService.logout();
-        
+
         // Mostrar confirmación de logout exitoso
         Swal.fire({
           title: '¡Sesión cerrada!',
           text: 'Has cerrado sesión correctamente',
           icon: 'success',
           timer: 2000,
-          showConfirmButton: false
+          showConfirmButton: false,
         });
       }
     });
