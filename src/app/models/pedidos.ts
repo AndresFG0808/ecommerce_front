@@ -19,9 +19,9 @@ export interface ProductoResponse {
 // Request completo
 export interface PedidosRequest {
   idCliente: number;
-  fechaCreacion: string; // formato "yyyy-MM-dd"
   estado: 'PENDIENTE' | 'ENVIADO' | 'ENTREGADO' | 'CANCELADO';
   productos: ProductoRequest[];
+  cliente: string
 }
 
 // Response completo

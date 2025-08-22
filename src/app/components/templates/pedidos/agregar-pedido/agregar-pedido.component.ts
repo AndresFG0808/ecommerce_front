@@ -19,9 +19,9 @@ export class AgregarPedidoComponent {
 
   pedido: PedidosRequest = {
     idCliente: 0,
-    fechaCreacion: '',
     estado: 'PENDIENTE',
     productos: [],
+    cliente: ""
   };
 
   clientes: ClientesResponse[] = [];
@@ -81,7 +81,9 @@ export class AgregarPedidoComponent {
     const producto = this.productos.find((item) => item.id === id);
 
     if (producto) {
-      const productoRequest = {
+
+      if(producto.stock> 0) {
+        const productoRequest = {
         idProducto: producto.id,
         precio: producto.precio,
         cantidad: 1,
@@ -91,6 +93,15 @@ export class AgregarPedidoComponent {
 
       this.productos = this.productos.filter((item) => item.id !== id);
       this.pedido.productos.push(productoRequest);
+      }else{
+         this.alertService.alertPositioned(
+          'Error',
+          "No hay suficiente stock para hacer un pedido",
+          'top-end',
+          'error'
+        );
+      }
+      
     }
   }
 
@@ -130,6 +141,7 @@ export class AgregarPedidoComponent {
              this.router.navigate(['/dashboard/pedidos']);
           },
           error: (error) => {
+            console.log("error: ", error)
             this.alertService.alertPositioned(
               'Error',
               error,
@@ -175,10 +187,6 @@ export class AgregarPedidoComponent {
     if (this.pedido.idCliente === 0) {
       return 'El cliente es requerido';
     }
-    if (this.pedido.fechaCreacion === '') {
-      return 'La fecha de creación es requerida';
-    }
-
     if (this.pedido.productos.length === 0) {
       return 'Debe haber al menos un producto en el pedido';
     }

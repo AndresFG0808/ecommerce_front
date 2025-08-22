@@ -66,7 +66,7 @@ export class UsuariosComponent implements OnInit {
         this.closeModal();
       },
       error: (err) => {
-        alert('Error al guardar usuario');
+        //alert('Error al guardar usuario');
         console.log(err);
       },
     });
@@ -85,7 +85,7 @@ export class UsuariosComponent implements OnInit {
         },
         error: (err) => {
           console.error('Error al eliminar usuario', err);
-          alert('No se pudo eliminar el usuario.');
+          
         },
       });
     }
