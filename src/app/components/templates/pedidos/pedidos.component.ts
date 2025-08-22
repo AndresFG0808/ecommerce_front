@@ -30,9 +30,9 @@ export class PedidosComponent implements OnInit {
 
   isAdmin: boolean = false;
 
-  estados = ['PENDIENTE', 'ENVIADO', 'ENTREGADO', 'CANCELADO'];
+  estados = ['PENDIENTE', 'ENVIADO', 'ENTREGADO'];
 
-  estadosAux = ['PENDIENTE', 'ENVIADO', 'ENTREGADO', 'CANCELADO'];
+  estadosAux = ['PENDIENTE', 'ENVIADO', 'ENTREGADO'];
 
   estado: string = '';
 
@@ -47,7 +47,7 @@ export class PedidosComponent implements OnInit {
     this.pedidosService.getPedidos().subscribe({
       next: (data) => {
         console.log('data', data);
-        this.pedidos = data.filter((item)=> item.estado !== 'CANCELADO');
+        this.pedidos = data.filter((item) => item.estado !== 'CANCELADO');
         this.isLoading = false;
       },
       error: (error) => {
@@ -56,7 +56,8 @@ export class PedidosComponent implements OnInit {
       },
     });
 
-    this.isAdmin = this.authService.getRoles().join(', ') === 'ROLE_ADMIN' ? true : false;
+    this.isAdmin =
+      this.authService.getRoles().join(', ') === 'ROLE_ADMIN' ? true : false;
   }
 
   verDetalles(pedido: PedidosResponse) {
@@ -72,16 +73,22 @@ export class PedidosComponent implements OnInit {
   }
 
   openModal(id: number): void {
-    const pedido = this.pedidos.find((item) => item.idPedidos === id);
-    if(pedido?.estado === 'ENTREGADO'){
-      this.alertService.alertPositioned("Info", "Este pedido ya no se puede modificar", "top-end", "info")
-    }else{
-      if (pedido) {
-      this.estados = this.estados.filter((item) => item !== pedido.estado);
-      this.pedidoSelect = pedido;
-      this.open = true;
-    }
-
+    if (this.isAdmin) {
+      const pedido = this.pedidos.find((item) => item.idPedidos === id);
+      if (pedido?.estado === 'ENTREGADO') {
+        this.alertService.alertPositioned(
+          'Info',
+          'Este pedido ya no se puede modificar',
+          'top-end',
+          'info'
+        );
+      } else {
+        if (pedido) {
+          this.estados = this.estados.filter((item) => item !== pedido.estado);
+          this.pedidoSelect = pedido;
+          this.open = true;
+        }
+      }
     }
   }
 
@@ -90,6 +97,30 @@ export class PedidosComponent implements OnInit {
     this.estados = this.estadosAux;
     this.pedidoSelect = undefined;
     this.estado = '';
+  }
+
+  async eliminarPedido(id: number): Promise<void> {
+    const confirm = await this.alertService.alertConfirm(
+      '¿Estás seguro?',
+      'El pedido será eliminado permanentemente',
+      'question'
+    );
+    if (confirm) {
+      this.pedidosService.cambiarEstado(id, 'CANCELADO').subscribe({
+        next: (data) => {
+          const index = this.pedidos.findIndex((p) => p.idPedidos === id);
+          if (index !== -1) {
+            this.pedidos[index] = data;
+            this.pedidos = this.pedidos.filter(
+              (item) => item.estado !== 'CANCELADO'
+            );
+          }
+          this.alertService.alertMessage('Exito', 'El pedido se ha eliminado');
+          this.closeModal();
+        },
+        error: (error) => {},
+      });
+    }
   }
 
   cambiarEstado(): void {
@@ -113,7 +144,9 @@ export class PedidosComponent implements OnInit {
             if (index !== -1) {
               this.pedidos[index] = data;
 
-              this.pedidos = this.pedidos.filter((item)=> item.estado!== 'CANCELADO');
+              this.pedidos = this.pedidos.filter(
+                (item) => item.estado !== 'CANCELADO'
+              );
             }
             this.alertService.alertMessage(
               'Exito',
