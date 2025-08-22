@@ -321,7 +321,7 @@ export class ClientesComponent {
             this.cerrarModal();
 
             Swal.fire({
-              text: 'Tipo actualizado correctamente',
+              text: 'Cliente actualizado correctamente',
               icon: 'success',
               confirmButtonColor: '#3085d6',
               timer: 2000,
@@ -353,7 +353,7 @@ export class ClientesComponent {
 
             Swal.fire({
               title: '¡Éxito!',
-              text: 'Tipo registrado correctamente',
+              text: 'Cliente registrado correctamente',
               icon: 'success',
               confirmButtonColor: '#3085d6',
               timer: 2000,
@@ -363,22 +363,9 @@ export class ClientesComponent {
             });
           },
           error: () =>
-            Swal.fire({
-              title: 'Error',
-              text: 'Error al registrar el tipo',
-              icon: 'error',
-              confirmButtonColor: '#d33',
-              confirmButtonText: 'Cerrar',
-            }),
+            console.error('Error manejado por el intercepto')
+            ,
         });
-
-      Swal.fire({
-        title: '¡Éxito!',
-        text: 'Cliente registrado correctamente',
-        icon: 'success',
-        timer: 1500,
-        showConfirmButton: false,
-      });
     }
   }
 
