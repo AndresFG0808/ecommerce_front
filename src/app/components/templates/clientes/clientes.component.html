@@ -50,7 +50,7 @@
               <td>{{ cliente.email }}</td>
               <td>{{ cliente.telefono }}</td>
               <td>{{ cliente.direccion || "No especificada" }}</td>
-              <td *ngIf="isAdmin" class="text-center">
+              <td class="text-center">
                 <div class="btn-group" role="group">
                   <button
                     class="btn btn-outline-info btn-sm"
@@ -60,6 +60,7 @@
                     <i class="bi bi-eye"></i>
                   </button>
                   <button
+                    *ngIf="isAdmin"
                     class="btn btn-outline-warning btn-sm"
                     (click)="editarCliente(cliente)"
                     title="Editar"
@@ -74,6 +75,7 @@
                     <i class="fa-solid fa-cart-shopping"></i>
                   </button>
                   <button
+                    *ngIf="isAdmin"
                     class="btn btn-outline-danger btn-sm"
                     (click)="eliminarCliente(cliente.id)"
                     title="Eliminar"
@@ -167,6 +169,8 @@
                   class="form-control"
                   required
                   maxlength="10"
+                  type="text"
+                  pattern="[0-9]{10}"
                 />
                 <div class="form-text">Formato: 10 dígitos numéricos</div>
               </div>
@@ -280,6 +284,7 @@
                           [(ngModel)]="producto.precio"
                           name="precio{{ i }}"
                           type="number"
+                          disabled=""
                           class="form-control"
                           min="0"
                           step="0.01"

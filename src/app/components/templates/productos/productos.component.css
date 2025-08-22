@@ -202,3 +202,39 @@
   gap: 8px;
   justify-content: flex-end;
 }
+
+
+.tarjetas-productos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
+  gap: 1rem;
+}
+
+.tarjeta {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 1rem;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  overflow: hidden;
+  word-wrap: break-word;   /* asegura que corte las palabras largas */
+  word-break: break-word;
+}
+
+.titulo {
+  font-size: 1.2rem;
+  font-weight: bold;
+  margin-bottom: .5rem;
+  white-space: nowrap;        /* evita múltiples líneas */
+  overflow: hidden;           /* oculta el exceso */
+  text-overflow: ellipsis;    /* agrega "..." si es muy largo */
+}
+
+.descripcion {
+  max-height: 100px;           /* altura máxima visible */
+  overflow: hidden;           /* oculta lo demás */
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;      /* máximo 3 líneas */
+  -webkit-box-orient: vertical;
+}

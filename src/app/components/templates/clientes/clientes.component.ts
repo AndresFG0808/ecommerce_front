@@ -47,23 +47,22 @@ export class ClientesComponent {
 
   // Estado para indicar si el formulario está en modo edición
   editandoCliente = false;
-  open = false
+  open = false;
 
   // ID del cliente que se está editando (0 = no hay edición)
   clienteEditandoId = 0;
 
-
   pedido: PedidosRequest = {
-      idCliente: 0,
-      cliente: "",
-      estado: 'PENDIENTE',
-      productos: [],
-    };
-  
-    //clientes: ClientesResponse[] = [];
-    //isLoading = true;
-    productos: ProductosResponse[] = [];
-    productosAux: ProductosResponse[] = [];
+    idCliente: 0,
+    cliente: '',
+    estado: 'PENDIENTE',
+    productos: [],
+  };
+
+  //clientes: ClientesResponse[] = [];
+  //isLoading = true;
+  productos: ProductosResponse[] = [];
+  productosAux: ProductosResponse[] = [];
 
   /**
    * Constructor vacío (no se inyecta servicio aquí).
@@ -72,7 +71,8 @@ export class ClientesComponent {
   constructor(
     private pedidosService: PedidosService,
     private router: Router,
-    private clienteService: ClientesService, private authService: AuthService,
+    private clienteService: ClientesService,
+    private authService: AuthService,
     private productosService: ProductoService,
     private alertService: AlertService
   ) {}
@@ -96,28 +96,24 @@ export class ClientesComponent {
       },
     });
 
-    this.isAdmin = this.authService.getRoles().join(', ') === "ROLE_ADMIN" ? true : false;
+    this.isAdmin =
+      this.authService.getRoles().join(', ') === 'ROLE_ADMIN' ? true : false;
 
     this.cargarClientes();
   }
 
-
-  abrirNuevoPedido(cliente: ClientesResponse):void{
-    this.open = true,
-    this.pedido.idCliente = cliente.id;
-    this.pedido.cliente = `${cliente.nombre} ${cliente.apellido}`
+  abrirNuevoPedido(cliente: ClientesResponse): void {
+    (this.open = true), (this.pedido.idCliente = cliente.id);
+    this.pedido.cliente = `${cliente.nombre} ${cliente.apellido}`;
   }
 
-  cerrarNuevoPedido() : void {
+  cerrarNuevoPedido(): void {
     this.open = false;
     this.pedido.idCliente = 0;
-    this.pedido.cliente = ``
-    this.pedido.productos = []
-    this.productos = this.productosAux
-
+    this.pedido.cliente = ``;
+    this.pedido.productos = [];
+    this.productos = this.productosAux;
   }
-
-
 
   getProductos(): void {
     this.productosService.getProductos().subscribe({
@@ -132,7 +128,6 @@ export class ClientesComponent {
     });
   }
 
-
   formatearPrecio(precio: number): string {
     return precio.toLocaleString('es-MX', {
       style: 'currency',
@@ -145,27 +140,25 @@ export class ClientesComponent {
     const producto = this.productos.find((item) => item.id === id);
 
     if (producto) {
-
-      if(producto.stock> 0) {
+      if (producto.stock > 0) {
         const productoRequest = {
-        idProducto: producto.id,
-        precio: producto.precio,
-        cantidad: 1,
-        stock: producto.stock,
-        nombre: producto.nombre,
-      };
+          idProducto: producto.id,
+          precio: producto.precio,
+          cantidad: 1,
+          stock: producto.stock,
+          nombre: producto.nombre,
+        };
 
-      this.productos = this.productos.filter((item) => item.id !== id);
-      this.pedido.productos.push(productoRequest);
-      }else{
-         this.alertService.alertPositioned(
+        this.productos = this.productos.filter((item) => item.id !== id);
+        this.pedido.productos.push(productoRequest);
+      } else {
+        this.alertService.alertPositioned(
           'Error',
-          "No hay suficiente stock para hacer un pedido",
+          'No hay suficiente stock para hacer un pedido',
           'top-end',
           'error'
         );
       }
-      
     }
   }
 
@@ -202,10 +195,10 @@ export class ClientesComponent {
               'Éxito',
               'El pedido ha sido agregado con éxito'
             );
-             this.router.navigate(['/dashboard/pedidos']);
+            this.router.navigate(['/dashboard/pedidos']);
           },
           error: (error) => {
-            console.log("error: ", error)
+            console.log('error: ', error);
             this.alertService.alertPositioned(
               'Error',
               error,
@@ -294,12 +287,50 @@ export class ClientesComponent {
    * Nota: validaciones de formulario se omiten aquí (se puede agregar un metodo en donde
    * hagamos las validaciones).
    */
+
+  validar(): string {
+    // Validación de cliente
+    if (!this.nuevoCliente || this.nuevoCliente.trim() === '') {
+      return 'El nombre es requerido';
+    }
+    if (!this.nuevoApellido || this.nuevoApellido.trim() === '') {
+      return 'El apellido es requerido';
+    }
+    if (!this.nuevoEmail || this.nuevoEmail.trim() === '') {
+      return 'El email es requerido';
+    }
+    // Validar formato básico de email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(this.nuevoEmail)) {
+      return 'El email no es válido';
+    }
+    if (!this.nuevoTelefono || this.nuevoTelefono.trim() === '') {
+      return 'El teléfono es requerido';
+    }
+
+    if(this.nuevoTelefono.length !== 10){
+      return "El telefono solo puede tener 10 digitos"
+    }
+    // Validar que sean solo números (mínimo 8 dígitos por ejemplo)
+    const telefonoRegex = /^[0-9]{8,15}$/;
+    if (!telefonoRegex.test(this.nuevoTelefono)) {
+      return 'El teléfono debe contener solo números (10 digitos)';
+    }
+    if (!this.nuevoDireccion || this.nuevoDireccion.trim() === '') {
+      return 'La dirección es requerida';
+    }
+    return ''; // sin errores
+  }
+
   registrarCliente(): void {
     // Si está en modo edición, actualizamos el cliente existente en memoria.
     //Limpiar el nombre:
+    console.log("yaaaax")
 
+    console.log('fffff: ', this.validar())
     if (this.editandoCliente) {
-      this.clienteService
+      if(this.validar()=== '') {
+        this.clienteService
         .actualizarCliente(this.clienteEditandoId, {
           nombre: this.nuevoCliente,
           apellido: this.nuevoApellido,
@@ -315,7 +346,7 @@ export class ClientesComponent {
             if (index !== -1) {
               this.clientes[index] = clienteActualizado;
             }
-            
+
             this.limpiarFormulario();
             // Cerrar el modal de actualizacion antes de mostrar el SwetAlert de exito/error
             this.cerrarModal();
@@ -331,11 +362,23 @@ export class ClientesComponent {
             });
           },
           error: (err) => {
-            console.error("Error al actualizar un cliente: ", err);
+            console.error('Error al actualizar un cliente: ', err);
           },
         });
+      }else{
+        this.alertService.alertPositioned(
+        'Error',
+        this.validar(),
+        'top-end',
+        'error'
+      );
+      }
+
+      
     } else {
-      this.clienteService
+
+       if(this.validar()=== '') {
+        this.clienteService
         .crearCliente({
           nombre: this.nuevoCliente,
           apellido: this.nuevoApellido,
@@ -362,10 +405,18 @@ export class ClientesComponent {
               allowEscapeKey: true,
             });
           },
-          error: () =>
-            console.error('Error manejado por el intercepto')
-            ,
+          error: () => console.error('Error manejado por el intercepto'),
         });
+       }else{
+        this.alertService.alertPositioned(
+        'Error',
+        this.validar(),
+        'top-end',
+        'error'
+      );
+
+       }
+      
     }
   }
 
@@ -418,8 +469,7 @@ export class ClientesComponent {
               (cliente) => cliente.id !== id
             );
           },
-          error: (err) =>
-            console.error("Error al eliminar cliente: ", err)
+          error: (err) => console.error('Error al eliminar cliente: ', err),
         });
       }
     });
