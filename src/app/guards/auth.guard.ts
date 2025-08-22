@@ -44,17 +44,11 @@ export class AuthGuard implements CanActivate {
      */
     canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
         // Verificar autenticación usando método sin efectos secundarios
-        if (!this.authService.isLoggedIn()) {
+        if (!this.authService.isAuthenticated()) {
             this.authService.logout(); // Limpia el estado si es necesario
+            this.router.navigate(['/login']); // Redirigir al login
             return false;
         } 
-        const expectedRoles: string[] = route.data['roles'];
-        if (expectedRoles && !this.authService.hasAnyRole(expectedRoles)) {
-            // Si el usuario no tiene los roles esperados, redirigir al login
-            Swal.fire('Acceso denegado', `Hola ${this.authService.getUsername()} no tienes acceso a este recurso!`, 'warning' );
-        return false;
-       
+        return true;
     }
-    return true
-        }
-    }
+}
