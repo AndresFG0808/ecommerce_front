@@ -7,6 +7,8 @@ import { PedidosComponent } from './components/templates/pedidos/pedidos.compone
 import { ProductosComponent } from './components/templates/productos/productos.component';
 import { LoginComponent } from './components/login/login.component';
 import { AuthGuard } from './guards/auth.guard';
+import { DetallesPedidoComponent } from './components/templates/pedidos/detalles-pedido/detalles-pedido.component';
+import { AgregarPedidoComponent } from './components/templates/pedidos/agregar-pedido/agregar-pedido.component';
 import { UsuariosComponent } from './components/templates/usuarios/usuarios.component';
 
 export const ROLES = {
@@ -34,10 +36,12 @@ const routes: Routes = [
     canActivate: [AuthGuard],
     children: [
       { path: '', redirectTo: 'pedidosclientes', pathMatch: 'full' },
-      { path: 'pedidosclientes', component: PedidosclientesComponent },
-      { path: 'clientes', component: ClientesComponent },
-      { path: 'pedidos', component: PedidosComponent },
-      { path: 'productos', component: ProductosComponent },
+      { path: 'pedidosclientes', component: PedidosclientesComponent, canActivate: [AuthGuard] },
+      { path: 'clientes', component: ClientesComponent, canActivate: [AuthGuard] },
+      { path: 'pedidos', component: PedidosComponent, canActivate: [AuthGuard] },
+      { path: 'pedidos/detalles', component: DetallesPedidoComponent, canActivate: [AuthGuard] },
+      { path: 'pedidos/agregar', component: AgregarPedidoComponent, canActivate: [AuthGuard] },
+      { path: 'productos', component: ProductosComponent, canActivate: [AuthGuard] },
       {path:  'usuarios', component: UsuariosComponent, canActivate: [AuthGuard], data: { roles: [ROLES.ADMIN] } },
     ],
   },

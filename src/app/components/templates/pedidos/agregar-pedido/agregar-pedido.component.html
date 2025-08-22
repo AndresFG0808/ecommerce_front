@@ -1,0 +1,161 @@
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h3 class="m-0">
+    <i class="bi bi-cart-check text-primary me-2"></i>
+    Nuevo pedido
+  </h3>
+</div>
+
+<div *ngIf="isLoading" class="d-flex justify-content-center py-5">
+  <div class="spinner-border text-primary" role="status">
+    <span class="visually-hidden">Cargando...</span>
+  </div>
+</div>
+
+<div *ngIf="!isLoading" class="container my-4">
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <form>
+        <div class="mb-3">
+          <label for="cliente" class="form-label">Cliente</label>
+          <select
+            name="tipo"
+            [(ngModel)]="pedido.idCliente"
+            #tipo="ngModel"
+            required
+            class="form-control"
+          >
+            <option value="" disabled selected>Seleccione un cliente</option>
+            <option *ngFor="let cliente of clientes" [value]="cliente.id">
+              {{`${cliente.nombre} ${cliente.apellido}` }}
+            </option>
+          </select>
+        </div>
+
+        
+
+        <!-- Productos -->
+        <h6 class="mt-4">Productos a pedir</h6>
+        <div class="table-responsive mb-3">
+          <table class="table table-bordered align-middle">
+            <thead class="table-light">
+              <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Stock</th>
+                <th>Cantidad</th>
+                <th>Precio</th>
+                <th>Subtotal</th>
+                <th class="text-center">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let producto of pedido.productos; let i = index">
+                <td class="fw-bold text-primary">
+                  # {{ producto.idProducto }}
+                </td>
+                <td>{{ producto.nombre }}</td>
+                <td>{{ producto.stock }}</td>
+                <td>
+                  <input
+                    [(ngModel)]="producto.cantidad"
+                    name="cantidad{{ i }}"
+                    type="number"
+                    class="form-control"
+                    min="1"
+                    [max]="producto.stock"
+                    (input)="validarCantidad(producto, $event)"
+                  />
+                </td>
+                <td>
+                  <input
+                    [(ngModel)]="producto.precio"
+                    name="precio{{ i }}"
+                    type="number"
+                    class="form-control"
+                    min="0"
+                    step="0.01"
+                    placeholder="Precio"
+                    (input)="validarPrecio(producto, $event)"
+                  />
+                </td>
+                <td>
+                  {{ formatearPrecio(producto.cantidad * producto.precio) }}
+                </td>
+                <td class="text-center">
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-danger"
+                    (click)="deleteProductoToPedidos(producto.idProducto)"
+                  >
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Total -->
+        <div class="text-end mb-4">
+          <h5>
+            Total:
+            <span class="fw-bold text-success">{{
+              calcularTotal() | currency : "MXN"
+            }}</span>
+          </h5>
+        </div>
+
+        <div class="table-responsive shadow-sm mt-4">
+          <h6 class="mt-4">Lista de productos</h6>
+          <table class="table table-hover align-middle">
+            <thead class="table-light">
+              <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Descripción</th>
+                <th>Precio</th>
+                <th>Stock</th>
+                <th class="text-center">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let producto of productos">
+                <td class="fw-bold text-primary">#{{ producto.id }}</td>
+                <td>{{ producto.nombre }}</td>
+                <td style="max-width: 300px">
+                  <small class="text-muted">{{ producto.descripcion }}</small>
+                </td>
+                <td class="fw-bold text-success">
+                  {{ formatearPrecio(producto.precio) }}
+                </td>
+                <td>
+                  {{ producto.stock }}
+                </td>
+                <td class="text-center">
+                  <div class="btn-group" role="group">
+                    <button class="btn btn-outline-info btn-sm" title="Ver">
+                      <i
+                        class="fa-solid fa-plus"
+                        (click)="addProductoToPedidos(producto.id)"
+                      ></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Botones -->
+        <div class="d-flex justify-content-between">
+          <a href="/dashboard/pedidos" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Cancelar
+          </a>
+          <button type="submit" class="btn btn-success" (click)="savePedido()">
+            <i class="bi bi-save"></i> Guardar Pedido
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

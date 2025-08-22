@@ -18,7 +18,7 @@ import { Observable } from "rxjs";
 @Injectable()
 export class TokenInterceptor implements HttpInterceptor {
     intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    const token = localStorage.getItem('access_token');
+    const token = localStorage.getItem('auth-token'); // Cambiado de 'access_token' a 'auth-token'
     
     console.log('🔍 TokenInterceptor - URL:', req.url);
     console.log('🔍 TokenInterceptor - Token presente:', !!token);

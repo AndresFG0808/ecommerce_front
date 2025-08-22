@@ -2,6 +2,11 @@ import { Component, OnInit } from '@angular/core';
 import { PedidosResponse } from '../../../models/pedidos';
 import { ClientesResponse } from '../../../models/clientes';
 
+import { ClientesService } from '../../../services/clientes.service';
+import { PedidosService } from '../../../services/pedidos.service';
+import Swal from 'sweetalert2';
+import { AuthService } from '../../../services/auth.service';
+
 /**
  * Componente para mostrar los pedidos filtrados por cliente.
  * - Permite seleccionar un cliente específico para ver sus pedidos.
@@ -15,64 +20,60 @@ import { ClientesResponse } from '../../../models/clientes';
   selector: 'app-pedidosclientes',
   standalone: false,
   templateUrl: './pedidosclientes.component.html',
-  styleUrl: './pedidosclientes.component.css'
+  styleUrl: './pedidosclientes.component.css',
 })
 export class PedidosclientesComponent implements OnInit {
-  
-  // Lista completa de clientes disponibles para seleccionar
-  clientes: ClientesResponse[] = [
-    { id: 1, nombre: 'Luis', apellido: 'Andres', email: 'luis.andres@email.com', telefono: '1234567890' },
-    { id: 2, nombre: 'Maria', apellido: 'Gomez', email: 'maria.gomez@email.com', telefono: '0987654321' },
-    { id: 3, nombre: 'Carlos', apellido: 'Ruiz', email: 'carlos.ruiz@email.com', telefono: '5555555555' },
-    { id: 4, nombre: 'Ana', apellido: 'Torres', email: 'ana.torres@email.com', telefono: '1111111111' }
-  ];
+  // Lista completa de clientes disponibles para seleccionar (Ahora se llena desde el back)
+  clientes: ClientesResponse[] = [];
+  pedidos: PedidosResponse [] = [];
 
   // Cliente actualmente seleccionado (null = mostrar todos)
   selectedClientId: number | null = null;
 
-  // Lista completa de todos los pedidos en el sistema
-  pedidos: PedidosResponse[] = [
-    {
-      idPedidos: 1,
-      idCliente: 1,
-      total: 17299.49,
-      fechaCreacion: new Date('2025-01-15T10:30:00'),
-      estado: 'PENDIENTE'
-    },
-    {
-      idPedidos: 2,
-      idCliente: 2,
-      total: 4798.50,
-      fechaCreacion: new Date('2025-01-14T15:45:00'),
-      estado: 'ENVIADO'
-    },
-    {
-      idPedidos: 3,
-      idCliente: 3,
-      total: 8999.99,
-      fechaCreacion: new Date('2025-01-13T09:15:00'),
-      estado: 'ENTREGADO'
-    },
-    {
-      idPedidos: 4,
-      idCliente: 1,
-      total: 1299.50,
-      fechaCreacion: new Date('2025-01-12T16:20:00'),
-      estado: 'CANCELADO'
-    },
-    {
-      idPedidos: 5,
-      idCliente: 2,
-      total: 2599.00,
-      fechaCreacion: new Date('2025-01-11T14:15:00'),
-      estado: 'ENTREGADO'
-    }
-  ];
-
-  constructor() {}
+  constructor(private clientesService: ClientesService, private pedidosService: PedidosService) {}
 
   ngOnInit(): void {
-    // Inicialización del componente
+    //Carga los datos del cliente desde el back
+    this.cargarClientes();
+    this.cargarPedidos();
+  }
+
+  cargarPedidos(): void {
+    this.pedidosService.getPedidos().subscribe({
+      next: (pedidos) => {
+        this.pedidos = pedidos
+      }, 
+      error: (err) => {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error al cargar clientes',
+          text:
+            err?.error?.message ||
+            'No se pudieron obtener los clientes del servidor',
+          confirmButtonText: 'Entendido',
+        });
+      }
+    })
+
+    
+  }
+
+  cargarClientes(): void {
+    this.clientesService.getClientes().subscribe({
+      next: (clientes) => {
+        this.clientes = clientes;
+      },
+      error: (err) => {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error al cargar clientes',
+          text:
+            err?.error?.message ||
+            'No se pudieron obtener los clientes del servidor',
+          confirmButtonText: 'Entendido',
+        });
+      },
+    });
   }
 
   /**
@@ -82,7 +83,7 @@ export class PedidosclientesComponent implements OnInit {
    */
   get filteredPedidos(): PedidosResponse[] {
     if (!this.selectedClientId) return this.pedidos;
-    return this.pedidos.filter(p => p.idCliente === this.selectedClientId);
+    return this.pedidos.filter((p) => p.idCliente === this.selectedClientId);
   }
 
   /**
@@ -91,8 +92,10 @@ export class PedidosclientesComponent implements OnInit {
    * @returns Nombre completo del cliente o ID si no se encuentra
    */
   obtenerNombreCliente(idCliente: number): string {
-    const cliente = this.clientes.find(c => c.id === idCliente);
-    return cliente ? `${cliente.nombre} ${cliente.apellido}` : `Cliente #${idCliente}`;
+    const cliente = this.clientes.find((c) => c.id === idCliente);
+    return cliente
+      ? `${cliente.nombre} ${cliente.apellido}`
+      : `Cliente #${idCliente}`;
   }
 
   /**
@@ -104,7 +107,7 @@ export class PedidosclientesComponent implements OnInit {
     return new Date(fecha).toLocaleDateString('es-MX', {
       year: 'numeric',
       month: 'short',
-      day: 'numeric'
+      day: 'numeric',
     });
   }
 
@@ -114,10 +117,10 @@ export class PedidosclientesComponent implements OnInit {
    * @returns String con precio formateado
    */
   formatearPrecio(precio: number): string {
-    return precio.toLocaleString('es-MX', { 
-      style: 'currency', 
+    return precio.toLocaleString('es-MX', {
+      style: 'currency',
       currency: 'MXN',
-      minimumFractionDigits: 2 
+      minimumFractionDigits: 2,
     });
   }
 
@@ -128,11 +131,16 @@ export class PedidosclientesComponent implements OnInit {
    */
   obtenerClaseEstado(estado: string): string {
     switch (estado) {
-      case 'PENDIENTE': return 'badge bg-warning text-dark';
-      case 'ENVIADO': return 'badge bg-info';
-      case 'ENTREGADO': return 'badge bg-success';
-      case 'CANCELADO': return 'badge bg-danger';
-      default: return 'badge bg-secondary';
+      case 'PENDIENTE':
+        return 'badge bg-warning text-dark';
+      case 'ENVIADO':
+        return 'badge bg-info';
+      case 'ENTREGADO':
+        return 'badge bg-success';
+      case 'CANCELADO':
+        return 'badge bg-danger';
+      default:
+        return 'badge bg-secondary';
     }
   }
 
@@ -141,7 +149,10 @@ export class PedidosclientesComponent implements OnInit {
    * @returns Suma total de los pedidos filtrados
    */
   calcularTotalPedidos(): number {
-    return this.filteredPedidos.reduce((total, pedido) => total + pedido.total, 0);
+    return this.filteredPedidos.reduce(
+      (total, pedido) => total + pedido.total,
+      0
+    );
   }
 
   /**
@@ -150,6 +161,6 @@ export class PedidosclientesComponent implements OnInit {
    * @returns Número de pedidos con ese estado
    */
   contarPedidosPorEstado(estado: string): number {
-    return this.filteredPedidos.filter(p => p.estado === estado).length;
+    return this.filteredPedidos.filter((p) => p.estado === estado).length;
   }
 }

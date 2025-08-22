@@ -103,7 +103,7 @@
                 <span class="fw-bold text-success">{{ formatearPrecio(pedido.total) }}</span>
               </td>
               <td>
-                <small>{{ formatearFecha(pedido.fechaCreacion) }}</small>
+                <small>{{pedido.fechaCreacion}}</small>
               </td>
               <td>
                 <span [ngClass]="obtenerClaseEstado(pedido.estado)">{{ pedido.estado }}</span>

@@ -2,6 +2,13 @@ import { Component } from '@angular/core';
 import { ClientesRequest, ClientesResponse } from '../../../models/clientes';
 import Swal from 'sweetalert2';
 import { ClientesService } from '../../../services/clientes.service';
+import { AuthService } from '../../../services/auth.service';
+import { ProductosResponse } from '../../../models/productos';
+import { PedidosRequest } from '../../../models/pedidos';
+import { PedidosService } from '../../../services/pedidos.service';
+import { Router } from '@angular/router';
+import { ProductoService } from '../../../services/producto.service';
+import { AlertService } from '../../../services/alert.service';
 
 /**
  * Componente para gestionar la información de los clientes.
@@ -18,6 +25,8 @@ import { ClientesService } from '../../../services/clientes.service';
   styleUrl: './clientes.component.css',
 })
 export class ClientesComponent {
+  isAdmin: boolean = false;
+
   // Array con los clientes que se muestran en la tabla.
   // Tipo ClientesResponse porque los objetos incluyen el ID generado.
   clientes: ClientesResponse[] = [];
@@ -38,15 +47,35 @@ export class ClientesComponent {
 
   // Estado para indicar si el formulario está en modo edición
   editandoCliente = false;
+  open = false
 
   // ID del cliente que se está editando (0 = no hay edición)
   clienteEditandoId = 0;
+
+
+  pedido: PedidosRequest = {
+      idCliente: 0,
+      cliente: "",
+      estado: 'PENDIENTE',
+      productos: [],
+    };
+  
+    //clientes: ClientesResponse[] = [];
+    //isLoading = true;
+    productos: ProductosResponse[] = [];
+    productosAux: ProductosResponse[] = [];
 
   /**
    * Constructor vacío (no se inyecta servicio aquí).
    * Si en el futuro se integra un servicio HTTP, inyectarlo en el constructor.
    */
-  constructor(private clienteService: ClientesService) {}
+  constructor(
+    private pedidosService: PedidosService,
+    private router: Router,
+    private clienteService: ClientesService, private authService: AuthService,
+    private productosService: ProductoService,
+    private alertService: AlertService
+  ) {}
 
   /**
    * Método llamado al inicializar el componente.
@@ -57,6 +86,7 @@ export class ClientesComponent {
     this.clienteService.getClientes().subscribe({
       next: (clientes) => {
         //Se le hicieron cambios aqui por que se cambio en el service para la respuesta
+        this.getProductos();
         this.clientes = Array.isArray(clientes) ? clientes : [clientes];
         this.isLoading = false;
       },
@@ -66,7 +96,181 @@ export class ClientesComponent {
       },
     });
 
+    this.isAdmin = this.authService.getRoles().join(', ') === "ROLE_ADMIN" ? true : false;
+
     this.cargarClientes();
+  }
+
+
+  abrirNuevoPedido(cliente: ClientesResponse):void{
+    this.open = true,
+    this.pedido.idCliente = cliente.id;
+    this.pedido.cliente = `${cliente.nombre} ${cliente.apellido}`
+  }
+
+  cerrarNuevoPedido() : void {
+    this.open = false;
+    this.pedido.idCliente = 0;
+    this.pedido.cliente = ``
+    this.pedido.productos = []
+    this.productos = this.productosAux
+
+  }
+
+
+
+  getProductos(): void {
+    this.productosService.getProductos().subscribe({
+      next: (data) => {
+        console.log('productos: ', data);
+        this.productos = data;
+        this.productosAux = data;
+      },
+      error: (error) => {
+        console.log('error: ', error);
+      },
+    });
+  }
+
+
+  formatearPrecio(precio: number): string {
+    return precio.toLocaleString('es-MX', {
+      style: 'currency',
+      currency: 'MXN',
+      minimumFractionDigits: 2,
+    });
+  }
+
+  addProductoToPedidos(id: number): void {
+    const producto = this.productos.find((item) => item.id === id);
+
+    if (producto) {
+
+      if(producto.stock> 0) {
+        const productoRequest = {
+        idProducto: producto.id,
+        precio: producto.precio,
+        cantidad: 1,
+        stock: producto.stock,
+        nombre: producto.nombre,
+      };
+
+      this.productos = this.productos.filter((item) => item.id !== id);
+      this.pedido.productos.push(productoRequest);
+      }else{
+         this.alertService.alertPositioned(
+          'Error',
+          "No hay suficiente stock para hacer un pedido",
+          'top-end',
+          'error'
+        );
+      }
+      
+    }
+  }
+
+  deleteProductoToPedidos(id: number): void {
+    const producto = this.productosAux.find((item) => item.id === id);
+    if (producto) {
+      this.pedido.productos = this.pedido.productos.filter(
+        (item) => item.idProducto !== id
+      );
+      this.productos.push(producto);
+    }
+  }
+
+  savePedido(): void {
+    if (this.validarForm() !== '') {
+      this.alertService.alertPositioned(
+        'Error',
+        this.validarForm(),
+        'top-end',
+        'error'
+      );
+    } else {
+      if (this.validarLista() !== '') {
+        this.alertService.alertPositioned(
+          'Error',
+          this.validarLista(),
+          'top-end',
+          'error'
+        );
+      } else {
+        this.pedidosService.crearPedido(this.pedido).subscribe({
+          next: async (data) => {
+            await this.alertService.alertMessage(
+              'Éxito',
+              'El pedido ha sido agregado con éxito'
+            );
+             this.router.navigate(['/dashboard/pedidos']);
+          },
+          error: (error) => {
+            console.log("error: ", error)
+            this.alertService.alertPositioned(
+              'Error',
+              error,
+              'top-end',
+              'error'
+            );
+          },
+        });
+      }
+    }
+  }
+
+  calcularTotal(): number {
+    return this.pedido.productos.reduce(
+      (acc, item) => acc + item.cantidad * item.precio,
+      0
+    );
+  }
+
+  validarCantidad(producto: any, event: any) {
+    const value = event.target.valueAsNumber;
+
+    if (value > producto.stock) {
+      producto.cantidad = producto.stock;
+      event.target.value = producto.stock;
+    }
+
+    if (value < 1) {
+      producto.cantidad = 1;
+      event.target.value = 1;
+    }
+  }
+
+  validarPrecio(producto: any, event: any) {
+    const value = event.target.valueAsNumber;
+    if (value < 1) {
+      producto.precio = 1;
+      event.target.value = 1;
+    }
+  }
+
+  validarForm(): string {
+    if (this.pedido.idCliente === 0) {
+      return 'El cliente es requerido';
+    }
+    if (this.pedido.productos.length === 0) {
+      return 'Debe haber al menos un producto en el pedido';
+    }
+    return '';
+  }
+
+  validarLista(): string {
+    let message = '';
+    for (const item of this.pedido.productos) {
+      if (!item.cantidad) {
+        message = `La cantidad del producto #${item.idProducto} es requerida`;
+        break;
+      }
+
+      if (!item.precio) {
+        message = `El precio del producto #${item.idProducto} es requerido`;
+        break;
+      }
+    }
+    return message;
   }
 
   /**
@@ -111,12 +315,13 @@ export class ClientesComponent {
             if (index !== -1) {
               this.clientes[index] = clienteActualizado;
             }
+            
             this.limpiarFormulario();
             // Cerrar el modal de actualizacion antes de mostrar el SwetAlert de exito/error
             this.cerrarModal();
 
             Swal.fire({
-              text: 'Tipo actualizado correctamente',
+              text: 'Cliente actualizado correctamente',
               icon: 'success',
               confirmButtonColor: '#3085d6',
               timer: 2000,
@@ -125,14 +330,9 @@ export class ClientesComponent {
               allowEscapeKey: true,
             });
           },
-          error: (err) =>
-            Swal.fire({
-              title: 'Error',
-              text: 'Error al actualizar el tipo',
-              icon: 'error',
-              confirmButtonColor: '#d33',
-              confirmButtonText: 'Cerrar',
-            }),
+          error: (err) => {
+            console.error("Error al actualizar un cliente: ", err);
+          },
         });
     } else {
       this.clienteService
@@ -153,7 +353,7 @@ export class ClientesComponent {
 
             Swal.fire({
               title: '¡Éxito!',
-              text: 'Tipo registrado correctamente',
+              text: 'Cliente registrado correctamente',
               icon: 'success',
               confirmButtonColor: '#3085d6',
               timer: 2000,
@@ -163,22 +363,9 @@ export class ClientesComponent {
             });
           },
           error: () =>
-            Swal.fire({
-              title: 'Error',
-              text: 'Error al registrar el tipo',
-              icon: 'error',
-              confirmButtonColor: '#d33',
-              confirmButtonText: 'Cerrar',
-            }),
+            console.error('Error manejado por el intercepto')
+            ,
         });
-
-      Swal.fire({
-        title: '¡Éxito!',
-        text: 'Cliente registrado correctamente',
-        icon: 'success',
-        timer: 1500,
-        showConfirmButton: false,
-      });
     }
   }
 

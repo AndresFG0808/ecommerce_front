@@ -2,15 +2,9 @@
   <div class="d-flex justify-content-between align-items-center mb-3">
     <h3 class="m-0">
       <i class="bi bi-cart-check text-primary me-2"></i>
-      Gestión de Pedidos
+      Gestión de pedidos
     </h3>
-    <button class="btn btn-success" (click)="abrirModal()">
-      <i class="bi bi-plus-circle me-1"></i> Nuevo Pedido
-    </button>
-  </div>
-
-  <div *ngIf="error" class="alert alert-danger">
-    {{ error }}
+   
   </div>
 
   <div *ngIf="isLoading" class="d-flex justify-content-center py-5">
@@ -19,7 +13,7 @@
     </div>
   </div>
 
-  <div *ngIf="!isLoading">
+  <div div *ngIf="!isLoading">
     <div *ngIf="pedidos && pedidos.length; else emptyState">
       <div class="table-responsive shadow-sm">
         <table class="table table-hover mb-0 align-middle">
@@ -30,7 +24,7 @@
               <th>Total</th>
               <th>Fecha</th>
               <th>Estado</th>
-              <th class="text-center">Acciones</th>
+              <th *ngIf="isAdmin" class="text-center">Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -38,43 +32,60 @@
               <td class="fw-bold text-primary">#{{ pedido.idPedidos }}</td>
               <td>
                 <div class="d-flex align-items-center">
-                  <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-2"
-                       style="width:35px; height:35px; font-weight:600; font-size:0.8rem;">
+                  <div
+                    class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-2"
+                    style="
+                      width: 35px;
+                      height: 35px;
+                      font-weight: 600;
+                      font-size: 0.8rem;
+                    "
+                  >
                     <i class="bi bi-person"></i>
                   </div>
-                  <div>{{ obtenerNombreCliente(pedido.idCliente) }}</div>
+                  <div>{{ pedido.cliente }}</div>
                 </div>
               </td>
               <td>
-                <span class="fw-bold text-success">{{ formatearPrecio(pedido.total) }}</span>
+                <span class="fw-bold text-success">{{
+                  formatearPrecio(pedido.total)
+                }}</span>
               </td>
               <td>
-                <small>{{ formatearFecha(pedido.fechaCreacion) }}</small>
+                <small>{{ pedido.fechaCreacion }}</small>
               </td>
               <td>
-                <span class="badge" [ngClass]="'bg-' + obtenerClaseEstado(pedido.estado).split('bg-')[1]">
-                  <i [ngClass]="obtenerIconoEstado(pedido.estado)" class="me-1"></i>
+                <button
+                  class="badge"
+                  (click)="openModal(pedido.idPedidos)"
+                  [ngClass]="
+                    'bg-' + obtenerClaseEstado(pedido.estado).split('bg-')[1]
+                  "
+                >
+                  <i
+                    [ngClass]="obtenerIconoEstado(pedido.estado)"
+                    class="me-1"
+                  ></i>
                   {{ pedido.estado }}
-                </span>
+                </button>
               </td>
-              <td class="text-center">
+              <td *ngIf="isAdmin" class="text-center">
                 <div class="btn-group" role="group">
-                  <button type="button" 
-                          class="btn btn-outline-info btn-sm" 
-                          (click)="verDetalles(pedido)"
-                          title="Ver detalles">
+                  <button
+                    type="button"
+                    class="btn btn-outline-info btn-sm"
+                    title="Ver detalles"
+                    (click)="verDetalles(pedido)"
+                  >
                     <i class="bi bi-eye"></i>
                   </button>
-                  <button type="button" 
-                          class="btn btn-outline-warning btn-sm" 
-                          (click)="editarPedido(pedido)"
-                          title="Editar">
-                    <i class="bi bi-pencil"></i>
-                  </button>
-                  <button type="button" 
-                          class="btn btn-outline-danger btn-sm" 
-                          (click)="eliminarPedido(pedido.idPedidos)"
-                          title="Eliminar">
+                  
+                  <button
+                    type="button"
+                    class="btn btn-outline-danger btn-sm"
+                    title="Eliminar"
+                    (click)="eliminarPedido(pedido.idPedidos)"
+                  >
                     <i class="bi bi-trash"></i>
                   </button>
                 </div>
@@ -95,78 +106,65 @@
       <div class="card p-4 text-center">
         <i class="bi bi-cart-x display-1 text-muted mb-3"></i>
         <p class="mb-2">No hay pedidos registrados.</p>
-        <button class="btn btn-primary" (click)="abrirModal()">Crear primer pedido</button>
+        <button class="btn btn-primary">Crear primer pedido</button>
       </div>
     </ng-template>
   </div>
+</div>
 
-  <!-- Modal: Nuevo / Editar Pedido -->
-  <div class="modal fade" id="modalNuevoPedido" tabindex="-1" aria-labelledby="modalNuevoPedidoLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-      <div class="modal-content">
-        <form (ngSubmit)="registrarPedido()" autocomplete="off" novalidate>
-          <div class="modal-header">
-            <h5 class="modal-title" id="modalNuevoPedidoLabel">
-              <i class="bi bi-cart-check me-2"></i>
-              {{ editandoPedido ? 'Editar Pedido' : 'Nuevo Pedido' }}
-            </h5>
-            <button type="button" class="btn-close" aria-label="Close" (click)="cerrarModal()"></button>
-          </div>
-          <div class="modal-body">
-            <div class="row g-3">
-              <div class="col-md-6">
-                <label class="form-label">Cliente</label>
-                <select name="idCliente" 
-                        [(ngModel)]="nuevoPedido.idCliente" 
-                        class="form-select" 
-                        required>
-                  <option value="0">Seleccionar cliente...</option>
-                  <option *ngFor="let cliente of clientes" [value]="cliente.id">
-                    {{ cliente.nombre }} {{ cliente.apellido }}
-                  </option>
-                </select>
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Total ($)</label>
-                <input name="total" 
-                       [(ngModel)]="nuevoPedido.total" 
-                       type="number" 
-                       class="form-control" 
-                       required 
-                       min="0" 
-                       step="0.01"
-                       placeholder="0.00" />
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Fecha de Creación</label>
-                <input name="fechaCreacion" 
-                       [(ngModel)]="nuevoPedido.fechaCreacion" 
-                       type="datetime-local" 
-                       class="form-control" 
-                       required />
-              </div>
-              <div class="col-md-6">
-                <label class="form-label">Estado</label>
-                <select name="estado" 
-                        [(ngModel)]="nuevoPedido.estado" 
-                        class="form-select" 
-                        required>
-                  <option *ngFor="let estado of estadosPedido" [value]="estado">
-                    {{ estado }}
-                  </option>
-                </select>
-              </div>
+<div *ngIf="open" class="modal-backdrop fade show"></div>
+<div
+  *ngIf="open"
+  class="modal d-block"
+  id="modalNuevoCliente"
+  tabindex="-1"
+  aria-labelledby="modalNuevoClienteLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <form (ngSubmit)="cambiarEstado()"  autocomplete="off" novalidate>
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalNuevoClienteLabel">
+            Cambiar de estado del pedido #{{ pedidoSelect?.idPedidos }}
+          </h5>
+          <button
+            type="button"
+            class="btn-close"
+            aria-label="Close"
+            (click)="closeModal()"
+          ></button>
+        </div>
+        <div class="modal-body">
+          <div class="row g-3">
+            <div class="col-md-6">
+              <p>Estado actual: {{pedidoSelect!.estado}}</p>
+              <label class="form-label">Nuevo estado:</label>
+              <select
+                id="estado"
+                class="form-select"
+                [(ngModel)]="estado"
+                name="estado"
+                required
+              >
+                <option *ngFor="let est of estados" [value]="est">
+                  {{ est }}
+                </option>
+              </select>
             </div>
           </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" (click)="cerrarModal()">Cancelar</button>
-            <button type="submit" class="btn btn-primary">
-              <i class="bi bi-check-circle me-1"></i>
-              {{ editandoPedido ? 'Guardar cambios' : 'Crear pedido' }}
-            </button>
-          </div>
-        </form>
-      </div>
+        </div>
+        <div class="modal-footer">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            (click)="closeModal()"
+          >
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn-primary">Guardar</button>
+        </div>
+      </form>
     </div>
   </div>
 </div>

@@ -13,13 +13,8 @@ import { AuthService } from '../../../services/auth.service';
   selector: 'app-productos',
   standalone: false,
   templateUrl: './productos.component.html',
-  styleUrl: './productos.component.css'
+  styleUrl: './productos.component.css',
 })
-
-/**
- * Clase ProductosComponent.
- * Implementa la lógica para manejar productos en la aplicación.
- */
 export class ProductosComponent implements OnInit {
   productos: ProductosResponse[] = [];
   productoForm: FormGroup;
@@ -30,6 +25,8 @@ export class ProductosComponent implements OnInit {
   muestraAcciones: boolean = false;
   isLoading = false;
   error = '';
+
+  isAdmin: boolean = false;
 
   /**
    * Constructor del componente ProductosComponent.
@@ -43,10 +40,31 @@ export class ProductosComponent implements OnInit {
     private authService: AuthService
   ) {
     this.productoForm = this.formBuilder.group({
-      nombre: ['', [Validators.required, Validators.minLength(20), Validators.maxLength(30)]],
-      descripcion: ['', [Validators.required, Validators.minLength(20), Validators.maxLength(150)]],
+      nombre: [
+        '',
+        [
+          Validators.required,
+          Validators.minLength(20),
+          Validators.maxLength(30),
+        ],
+      ],
+      descripcion: [
+        '',
+        [
+          Validators.required,
+          Validators.minLength(20),
+          Validators.maxLength(150),
+        ],
+      ],
       precio: [0, [Validators.required, Validators.min(0)]],
-      stock: [0, [Validators.required, Validators.min(0), Validators.pattern('^[0-9]+$')]]
+      stock: [
+        0,
+        [
+          Validators.required,
+          Validators.min(0),
+          Validators.pattern('^[0-9]+$'),
+        ],
+      ],
     });
   }
   /**
@@ -56,27 +74,29 @@ export class ProductosComponent implements OnInit {
 
   ngOnInit(): void {
     this.cargarProductos();
-    if(this.authService.hasRole('ROLE_ADMIN')) {
+    if (this.authService.hasRole('ROLE_ADMIN')) {
       this.muestraAcciones = true;
     }
+
+    this.isAdmin = this.authService.getRoles().join(', ') === 'ROLE_ADMIN' ? true : false;
   }
 
   /**
    * Carga la lista de productos desde el servicio.
    * Muestra un mensaje de error si no se pueden cargar los productos.
-   */ 
+   */
   cargarProductos(): void {
     this.isLoading = true;
     this.productoService.getProductos().subscribe({
-      next: resp => {
+      next: (resp) => {
         this.productos = resp;
         console.log(this.productos);
         this.isLoading = false;
       },
-      error: err => {
+      error: (err) => {
         this.error = 'Error al cargar productos';
         this.isLoading = false;
-      }
+      },
     });
   }
 
@@ -120,32 +140,35 @@ export class ProductosComponent implements OnInit {
         /**Editar producto existente
          * Aquí se agrega la lógica para editar un producto existente.
          * Se utiliza el servicio productoService para enviar la solicitud de actualización al backend.
-         *  */ 
-        this.productoService.putProducto(productoData, this.selectedProducto.id).subscribe({
-          next: updateProducto => {
-            const index = this.productos.findIndex(p => p.id === updateProducto.id);
-            if (index !== -1) {
-              this.productos[index] = updateProducto;
-            }
-            Swal.fire({
-              title: 'Éxito',
-              text: 'Producto actualizado correctamente',
-              icon: 'success',
-            });
-            this.resetForm();
+         *  */
+        this.productoService
+          .putProducto(productoData, this.selectedProducto.id)
+          .subscribe({
+            next: (updateProducto) => {
+              const index = this.productos.findIndex(
+                (p) => p.id === updateProducto.id
+              );
+              if (index !== -1) {
+                this.productos[index] = updateProducto;
+              }
+              Swal.fire({
+                title: 'Éxito',
+                text: 'Producto actualizado correctamente',
+                icon: 'success',
+              });
+              this.resetForm();
               const modal = document.getElementById('modalProducto');
-            if (modal) (window as any).bootstrap.Modal.getOrCreateInstance(modal).hide();
+              if (modal)
+                (window as any).bootstrap.Modal.getOrCreateInstance(
+                  modal
+                ).hide();
 
-            this.cerrarModal();
-          },
-          error: () => {
-            Swal.fire({
-              title: 'Error',
-              text: 'No se pudo actualizar el producto',
-              icon: 'error',
-            });
-          }
-        });
+              this.cerrarModal();
+            },
+            error: (err) => {
+              console.error('Error al eliminar un productos');
+            },
+          });
       } else {
         // Crear nuevo producto
         /**
@@ -153,17 +176,18 @@ export class ProductosComponent implements OnInit {
          */
 
         this.productoService.postProducto(productoData).subscribe({
-          next: newProducto => {
+          next: (newProducto) => {
             this.productos.push(newProducto);
             Swal.fire({
               title: 'Éxito',
               text: 'Producto creado correctamente',
               icon: 'success',
-              confirmButtonText: 'Aceptar'
+              confirmButtonText: 'Aceptar',
             });
             this.resetForm();
             const modal = document.getElementById('modalProducto');
-            if (modal) (window as any).bootstrap.Modal.getOrCreateInstance(modal).hide();
+            if (modal)
+              (window as any).bootstrap.Modal.getOrCreateInstance(modal).hide();
 
             this.cerrarModal();
           },
@@ -173,7 +197,7 @@ export class ProductosComponent implements OnInit {
               text: 'No se pudo crear el producto',
               icon: 'error',
             });
-          }
+          },
         });
       }
     }
@@ -182,7 +206,7 @@ export class ProductosComponent implements OnInit {
   /**
    * Edita un producto existente.
    * Muestra el formulario con los datos del producto seleccionado.
-   * @param producto 
+   * @param producto
    */
 
   editProducto(producto: ProductosResponse): void {
@@ -194,71 +218,66 @@ export class ProductosComponent implements OnInit {
       nombre: producto.nombre,
       descripcion: producto.descripcion,
       precio: producto.precio,
-      stock: producto.stock
-      
+      stock: producto.stock,
     });
     this.abrirModal();
   }
- /**
-  *   Elimina un producto por su ID.
-  * Muestra un modal de confirmación antes de eliminar.
-  * @param id 
-  * @returns 
-  */
+  /**
+   *   Elimina un producto por su ID.
+   * Muestra un modal de confirmación antes de eliminar.
+   * @param id
+   * @returns
+   */
   deleteProducto(id: number): void {
-   
-  if (!id) {
-    Swal.fire({
-      title: 'Error',
-      text: 'ID de producto inválido. No se puede eliminar.',
-      icon: 'error',
-    });
-    return;
-  }
-
-  Swal.fire({
-    title: '¿Estás seguro?',
-    text: 'No podrás deshacer esta acción',
-    icon: 'warning',
-    showConfirmButton: true,
-    showCancelButton: true,
-    confirmButtonColor: '#3085d6',
-    cancelButtonColor: '#d33',
-    confirmButtonText: 'Sí, eliminar'
-  }).then((result) => {
- 
-    if (result.isConfirmed) {
-      this.productoService.deleteProducto(id).subscribe({
-        next: deletedProducto => {
-          this.productos = this.productos.filter(p => p.id !== id);
-          Swal.fire({
-            title: 'Éxito',
-            text: 'Producto ' + deletedProducto.nombre + ' eliminado correctamente',
-            icon: 'success',
-          });
-        },
-
-     
-        error: () => {
-          Swal.fire({
-            title: 'Error',
-            text: 'No se pudo eliminar el producto',
-            icon: 'error',
-          });
-        }
+    if (!id) {
+      Swal.fire({
+        title: 'Error',
+        text: 'ID de producto inválido. No se puede eliminar.',
+        icon: 'error',
       });
+      return;
     }
-  });
-}
+
+    Swal.fire({
+      title: '¿Estás seguro?',
+      text: 'No podrás deshacer esta acción',
+      icon: 'warning',
+      showConfirmButton: true,
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Sí, eliminar',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.productoService.deleteProducto(id).subscribe({
+          next: (deletedProducto) => {
+            this.productos = this.productos.filter((p) => p.id !== id);
+            Swal.fire({
+              title: 'Éxito',
+              text:
+                'Producto ' +
+                deletedProducto.nombre +
+                ' eliminado correctamente',
+              icon: 'success',
+            });
+          },
+          error: () => {
+            console.error('Error al eliminar un productos')
+          },
+        });
+      }
+    });
+  }
 
   /**
    * Abre el modal bootstrap de cliente.
    * @param {void}
    * @returns {void}
    */
-abrirModal(): void {
+  abrirModal(): void {
     const modal = document.getElementById('modalProducto');
-    if (modal) (window as any).bootstrap.Modal.getOrCreateInstance(modal).show();
+    if (modal)
+      (window as any).bootstrap.Modal.getOrCreateInstance(modal).show();
   }
 
   /**
@@ -268,22 +287,20 @@ abrirModal(): void {
    */
   cerrarModal(): void {
     const modal = document.getElementById('modalNuevoCliente');
-    if (modal) (window as any).bootstrap.Modal.getOrCreateInstance(modal).hide();
+    if (modal)
+      (window as any).bootstrap.Modal.getOrCreateInstance(modal).hide();
   }
-/**
- * 
- * Permite que solo se ingresen números en los campos de tipo número.
- * @param event Evento de teclado.
- */
+  /**
+   *
+   * Permite que solo se ingresen números en los campos de tipo número.
+   * @param event Evento de teclado.
+   */
 
   onlyNumbers(event: KeyboardEvent): void {
-  const charCode = event.key.charCodeAt(0);
-  // Solo permitir números (0-9) y punto para decimales
-  if (event.key !== '.' && (charCode < 48 || charCode > 57)) {
-    event.preventDefault();
+    const charCode = event.key.charCodeAt(0);
+    // Solo permitir números (0-9) y punto para decimales
+    if (event.key !== '.' && (charCode < 48 || charCode > 57)) {
+      event.preventDefault();
+    }
   }
 }
-
-}
-
-
