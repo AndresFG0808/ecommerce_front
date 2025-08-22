@@ -28,42 +28,7 @@
   </div>
 </div>
 
-<!-- Formulario para crear/editar productos -->
-<div *ngIf="showForm" class="modal-form">
-  <h2>{{ textoModal }}</h2>
-  <form [formGroup]="productoForm" (ngSubmit)="onsubmit()">
-    <label>Nombre:</label>
-    <input formControlName="nombre" />
-    <div *ngIf="productoForm.get('nombre')?.invalid && productoForm.get('nombre')?.touched">
-      <small>El nombre es obligatorio (20-30 caracteres).</small>
-    </div>
 
-    <label>Descripción:</label>
-    <textarea formControlName="descripcion"></textarea>
-    <div *ngIf="productoForm.get('descripcion')?.invalid && productoForm.get('descripcion')?.touched">
-      <small>La descripción es obligatoria (20-150 caracteres).</small>
-    </div>
-
-    <label>Precio:</label>
-   <input type="number" formControlName="precio" (keypress)="onlyNumbers($event)" />
-    <div *ngIf="productoForm.get('precio')?.invalid && productoForm.get('precio')?.touched">
-      <small>El precio debe ser mayor o igual a 0.</small>
-    </div>
-
-    <label>Stock:</label>
-    <input type="number" formControlName="stock" (keypress)="onlyNumbers($event)" />
-    <div *ngIf="productoForm.get('stock')?.invalid && productoForm.get('stock')?.touched">
-      <small>El stock debe ser un número entero mayor o igual a 0.</small>
-    </div>
-<div *ngIf="muestraAcciones">
-    <label>Acciones:</label>
-    <button type="submit" [disabled]="productoForm.invalid">
-      {{ isEditMode ? 'Actualizar' : 'Crear' }}
-    </button>
-    <button type="button" (click)="resetForm()">Cancelar</button>
-    </div>
-  </form>
-</div>
 
 <!-- Modal para editar/eliminar productos -->
  <!-- Modal Bootstrap para el formulario de producto -->

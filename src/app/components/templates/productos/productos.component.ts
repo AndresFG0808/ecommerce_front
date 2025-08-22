@@ -15,6 +15,11 @@ import { AuthService } from '../../../services/auth.service';
   templateUrl: './productos.component.html',
   styleUrl: './productos.component.css'
 })
+
+/**
+ * Clase ProductosComponent.
+ * Implementa la lógica para manejar productos en la aplicación.
+ */
 export class ProductosComponent implements OnInit {
   productos: ProductosResponse[] = [];
   productoForm: FormGroup;
@@ -201,6 +206,7 @@ export class ProductosComponent implements OnInit {
   * @returns 
   */
   deleteProducto(id: number): void {
+   
   if (!id) {
     Swal.fire({
       title: 'Error',
@@ -220,6 +226,7 @@ export class ProductosComponent implements OnInit {
     cancelButtonColor: '#d33',
     confirmButtonText: 'Sí, eliminar'
   }).then((result) => {
+ 
     if (result.isConfirmed) {
       this.productoService.deleteProducto(id).subscribe({
         next: deletedProducto => {
@@ -230,6 +237,8 @@ export class ProductosComponent implements OnInit {
             icon: 'success',
           });
         },
+
+     
         error: () => {
           Swal.fire({
             title: 'Error',

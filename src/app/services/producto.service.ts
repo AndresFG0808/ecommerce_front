@@ -13,6 +13,10 @@ import { ProductosRequest, ProductosResponse } from "../models/productos";
   providedIn: 'root'
 })
 
+/**
+ * Servicio ProductoService que se encarga de interactuar con la API de productos.
+ * Proporciona métodos para obtener, registrar, actualizar y eliminar productos.
+ */
 export class ProductoService {
 /**
     * URL base de la API para productos, obtenida del archivo de entorno.
