@@ -1,1 +1,97 @@
-<p>usuarios works!</p>
+<div class="container mt-4">
+
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h3 class="text-primary">Usuarios</h3>
+    <button class="btn btn-success" (click)="openModal()">
+      <i class="bi bi-person-plus"></i> Nuevo Usuario
+    </button>
+  </div>
+
+  <!-- Loader -->
+  <div *ngIf="isLoading" class="text-center my-4">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Cargando...</span>
+    </div>
+  </div>
+
+  <!-- Tabla de usuarios -->
+  <div *ngIf="!isLoading && usuarios.length > 0; else noData">
+      <table *ngIf="!isLoading" class="table table-striped table-bordered">
+    <thead class="table-dark">
+      <tr>
+        <th>Usuario</th>
+        <th>Roles</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let usuario of usuarios">
+        <td>{{ usuario.username }}</td>
+        <td>
+          <span *ngFor="let rol of usuario.roles" class="badge bg-primary me-1">
+            {{ rol }}
+          </span>
+        </td>
+        <td>
+          <button class="btn btn-sm btn-danger" (click)="onEliminar(usuario.username)">
+            <i class="bi bi-trash"></i> Eliminar
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <!-- Mensaje cuando no hay usuarios -->
+  <ng-template #noData>
+    <div class="alert alert-warning text-center" role="alert">
+      No hay usuarios disponibles.
+    </div>
+  </ng-template>
+
+  <!-- Modal Nuevo Usuario -->
+  <div *ngIf="open" class="modal d-block" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <form (ngSubmit)="guardarUsuario()" #usuarioForm="ngForm" autocomplete="off">
+          <div class="modal-header">
+            <h5 class="modal-title">Agregar Usuario</h5>
+            <button type="button" class="btn-close" (click)="closeModal()"></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label">Usuario</label>
+              <input type="text" name="username" [(ngModel)]="nuevoUsuario.username"
+                class="form-control" required maxlength="50" />
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Contraseña</label>
+              <input type="password" name="password" [(ngModel)]="nuevoUsuario.password"
+                class="form-control" required minlength="6" />
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Roles</label>
+              <select multiple class="form-select" [(ngModel)]="nuevoUsuario.roles" name="roles" required>
+                <option value="ROLE_USER">ROLE_USER</option>
+                <option value="ROLE_ADMIN">ROLE_ADMIN</option>
+              </select>
+              <small class="text-muted">Mantén presionada CTRL (Windows) o CMD (Mac) para seleccionar varios</small>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" (click)="closeModal()">Cancelar</button>
+            <button type="submit" class="btn btn-primary" [disabled]="usuarioForm.invalid">
+              Guardar
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fondo oscuro detrás del modal -->
+  <div *ngIf="open" class="modal-backdrop fade show"></div>
+
+</div>
