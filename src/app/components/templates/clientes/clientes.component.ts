@@ -350,7 +350,7 @@ export class ClientesComponent {
 
             // Cerrar el modal de actualizacion antes de mostrar el SwetAlert de exito/error
             this.cerrarModal();
-
+            
             Swal.fire({
               title: '¡Éxito!',
               text: 'Tipo registrado correctamente',
@@ -366,14 +366,6 @@ export class ClientesComponent {
             console.error('Error manejado por el intercepto')
             ,
         });
-
-      Swal.fire({
-        title: '¡Éxito!',
-        text: 'Cliente registrado correctamente',
-        icon: 'success',
-        timer: 1500,
-        showConfirmButton: false,
-      });
     }
   }
 
