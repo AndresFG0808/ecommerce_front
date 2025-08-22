@@ -363,13 +363,8 @@ export class ClientesComponent {
             });
           },
           error: () =>
-            Swal.fire({
-              title: 'Error',
-              text: 'Error al registrar el tipo',
-              icon: 'error',
-              confirmButtonColor: '#d33',
-              confirmButtonText: 'Cerrar',
-            }),
+            console.error('Error manejado por el intercepto')
+            ,
         });
 
       Swal.fire({
