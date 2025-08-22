@@ -321,7 +321,7 @@ export class ClientesComponent {
             this.cerrarModal();
 
             Swal.fire({
-              text: 'Tipo actualizado correctamente',
+              text: 'Cliente actualizado correctamente',
               icon: 'success',
               confirmButtonColor: '#3085d6',
               timer: 2000,
@@ -350,10 +350,10 @@ export class ClientesComponent {
 
             // Cerrar el modal de actualizacion antes de mostrar el SwetAlert de exito/error
             this.cerrarModal();
-            
+
             Swal.fire({
               title: '¡Éxito!',
-              text: 'Tipo registrado correctamente',
+              text: 'Cliente registrado correctamente',
               icon: 'success',
               confirmButtonColor: '#3085d6',
               timer: 2000,
