@@ -7,40 +7,46 @@ import { AlertService } from '../../../services/alert.service';
   selector: 'app-usuarios',
   standalone: false,
   templateUrl: './usuarios.component.html',
-  styleUrl: './usuarios.component.css'
+  styleUrl: './usuarios.component.css',
 })
-export class UsuariosComponent  implements OnInit{
-
+export class UsuariosComponent implements OnInit {
   usuarios: AuthResponse[] = [];
-   isLoading = true;
-   open = false;
+  isLoading = true;
+  open = false;
   nuevoUsuario: AuthRequest = { username: '', password: '', roles: [] };
 
-
-
-   constructor(
-    private usuariosService : UsuariosService,
-    private alertService: AlertService,
+  constructor(
+    private usuariosService: UsuariosService,
+    private alertService: AlertService
   ) {}
-
 
   ngOnInit(): void {
     this.getUsuarios();
-    
   }
 
-
-  getUsuarios() : void {
+  getUsuarios(): void {
+    const mapRole = (r: string) => {
+      if (!r) return r;
+      if (r.includes('ADMIN')) return 'ADMINISTRADOR';
+      if (r.includes('USER')) return 'USUARIO';
+      return r.replace('ROLE_', '');
+    };
 
     this.usuariosService.getUsuarios().subscribe({
       next: (data) => {
-        this.usuarios = data;
-        this.isLoading= false
+        this.usuarios = data.map((u) => ({
+          ...u,
+          roles: (u.roles || []).map(mapRole),
+          // Si quieres reemplazar el username por el rol principal, descomenta la línea siguiente:
+          // username: ((u.roles || [])[0]) ? mapRole((u.roles || [])[0]) : u.username
+        }));
+        this.isLoading = false;
       },
       error: (error) => {
-        console.log("error: ", error)
-      }
-    })
+        console.error('error: ', error);
+        this.isLoading = false;
+      },
+    });
   }
 
   openModal(): void {
@@ -56,33 +62,32 @@ export class UsuariosComponent  implements OnInit{
     this.usuariosService.crearUsuario(this.nuevoUsuario).subscribe({
       next: (data) => {
         this.usuarios.push(data);
-        this.alertService.alertMessage("Éxito", "Usuario agregado")
+        this.alertService.alertMessage('Éxito', 'Usuario agregado');
         this.closeModal();
       },
       error: (err) => {
-        alert("Error al guardar usuario");
+        alert('Error al guardar usuario');
         console.log(err);
-      }
+      },
     });
   }
 
   async onEliminar(username: string): Promise<void> {
-
-   const confirm = await  this.alertService.alertConfirm("¿Estás seguro?", "Una vez eliminado el usuario no podrá ser recuperado", 'question')
-  if (confirm) {
-    this.usuariosService.eliminarUsuario(username).subscribe({
-      next: () => {
-        this.usuarios = this.usuarios.filter(u => u.username !== username);
-      },
-      error: (err) => {
-        console.error("Error al eliminar usuario", err);
-        alert("No se pudo eliminar el usuario.");
-      }
-    });
+    const confirm = await this.alertService.alertConfirm(
+      '¿Estás seguro?',
+      'Una vez eliminado el usuario no podrá ser recuperado',
+      'question'
+    );
+    if (confirm) {
+      this.usuariosService.eliminarUsuario(username).subscribe({
+        next: () => {
+          this.usuarios = this.usuarios.filter((u) => u.username !== username);
+        },
+        error: (err) => {
+          console.error('Error al eliminar usuario', err);
+          alert('No se pudo eliminar el usuario.');
+        },
+      });
+    }
   }
-}
-
-
-
-
 }
