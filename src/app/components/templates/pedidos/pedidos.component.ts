@@ -5,6 +5,7 @@ import Swal from 'sweetalert2';
 import { PedidosService } from '../../../services/pedidos.service';
 import { Router } from '@angular/router';
 import { AlertService } from '../../../services/alert.service';
+import { AuthService } from '../../../services/auth.service';
 
 /**
  * Componente para gestionar la información de los pedidos.
@@ -27,6 +28,8 @@ export class PedidosComponent implements OnInit {
   open = false;
   pedidoSelect: PedidosResponse | undefined;
 
+  isAdmin: boolean = false;
+
   estados = ['PENDIENTE', 'ENVIADO', 'ENTREGADO', 'CANCELADO'];
 
   estadosAux = ['PENDIENTE', 'ENVIADO', 'ENTREGADO', 'CANCELADO'];
@@ -36,7 +39,8 @@ export class PedidosComponent implements OnInit {
   constructor(
     private pedidosService: PedidosService,
     private router: Router,
-    private alertService: AlertService
+    private alertService: AlertService,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -51,6 +55,8 @@ export class PedidosComponent implements OnInit {
         this.isLoading = false;
       },
     });
+
+    this.isAdmin = this.authService.getRoles().join(', ') === 'ROLE_ADMIN' ? true : false;
   }
 
   verDetalles(pedido: PedidosResponse) {

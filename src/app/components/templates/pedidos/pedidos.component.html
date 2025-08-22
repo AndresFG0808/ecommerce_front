@@ -26,7 +26,7 @@
               <th>Total</th>
               <th>Fecha</th>
               <th>Estado</th>
-              <th class="text-center">Acciones</th>
+              <th *ngIf="isAdmin" class="text-center">Acciones</th>
             </tr>
           </thead>
           <tbody>
@@ -71,7 +71,7 @@
                   {{ pedido.estado }}
                 </button>
               </td>
-              <td class="text-center">
+              <td *ngIf="isAdmin" class="text-center">
                 <div class="btn-group" role="group">
                   <button
                     type="button"

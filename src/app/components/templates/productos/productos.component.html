@@ -21,7 +21,7 @@
 
 
 
-    <div class="botones-tarjeta">
+    <div *ngIf="isAdmin" class="botones-tarjeta">
     <button (click)="editProducto(producto)">Editar</button>
     <button (click)="deleteProducto(producto.id)">Eliminar</button>
     </div>

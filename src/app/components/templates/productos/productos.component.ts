@@ -26,6 +26,8 @@ export class ProductosComponent implements OnInit {
   isLoading = false;
   error = '';
 
+  isAdmin: boolean = false;
+
   /**
    * Constructor del componente ProductosComponent.
    * Inicializa el formulario de productos y los servicios necesarios.
@@ -75,6 +77,8 @@ export class ProductosComponent implements OnInit {
     if (this.authService.hasRole('ROLE_ADMIN')) {
       this.muestraAcciones = true;
     }
+
+    this.isAdmin = this.authService.getRoles().join(', ') === 'ROLE_ADMIN' ? true : false;
   }
 
   /**

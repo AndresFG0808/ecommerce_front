@@ -13,6 +13,8 @@ export class DashboardComponent {
   username: string | null = null;
   roles: string | null = null;
 
+  isAdmin: boolean = false;
+
   constructor(private authService: AuthService, private router: Router) {}
 
   /**
@@ -34,9 +36,12 @@ export class DashboardComponent {
     const getroles = this.authService.getRoles().join(', ');
     if (getroles === 'ROLE_ADMIN') {
       this.roles = 'ADMINISTRADOR'
+      this.isAdmin = true;
     } else if (getroles === 'ROLE_USER'){
       this.roles = 'USUARIO'
+      this.isAdmin = false;
     } else  {
+      this.isAdmin = false;
       this.roles = 'identifiquese!'
     } 
   }

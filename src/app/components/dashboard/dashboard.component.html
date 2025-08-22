@@ -43,7 +43,7 @@
           <i class="bi bi-box-seam me-2"></i> Productos
         </a>
       </li>
-      <li class="nav-item">
+      <li class="nav-item" *ngIf="isAdmin">
         <a
           class="nav-link"
           routerLink="/dashboard/usuarios"

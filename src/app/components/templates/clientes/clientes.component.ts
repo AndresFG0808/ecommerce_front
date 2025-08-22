@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { ClientesRequest, ClientesResponse } from '../../../models/clientes';
 import Swal from 'sweetalert2';
 import { ClientesService } from '../../../services/clientes.service';
+import { AuthService } from '../../../services/auth.service';
 
 /**
  * Componente para gestionar la información de los clientes.
@@ -18,6 +19,8 @@ import { ClientesService } from '../../../services/clientes.service';
   styleUrl: './clientes.component.css',
 })
 export class ClientesComponent {
+  isAdmin: boolean = false;
+
   // Array con los clientes que se muestran en la tabla.
   // Tipo ClientesResponse porque los objetos incluyen el ID generado.
   clientes: ClientesResponse[] = [];
@@ -46,7 +49,7 @@ export class ClientesComponent {
    * Constructor vacío (no se inyecta servicio aquí).
    * Si en el futuro se integra un servicio HTTP, inyectarlo en el constructor.
    */
-  constructor(private clienteService: ClientesService) {}
+  constructor(private clienteService: ClientesService, private authService: AuthService) {}
 
   /**
    * Método llamado al inicializar el componente.
@@ -65,6 +68,8 @@ export class ClientesComponent {
         this.isLoading = false;
       },
     });
+
+    this.isAdmin = this.authService.getRoles().join(', ') === "ROLE_ADMIN" ? true : false;
 
     this.cargarClientes();
   }
